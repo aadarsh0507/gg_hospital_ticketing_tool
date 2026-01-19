@@ -30,9 +30,13 @@ const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 })();
 
 // Middleware
+// CORS configuration - allow all origins
 app.use(cors({
   origin: '*',
-  credentials: false
+  credentials: false,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  exposedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
