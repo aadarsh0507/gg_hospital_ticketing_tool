@@ -1,0 +1,147 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Note: SQLite doesn't support enums, so we use String types
+// Valid values for UserRole: ADMIN, STAFF, REQUESTER
+// Valid values for RequestStatus: NEW, IN_PROGRESS, COMPLETED, CANCELLED, ON_HOLD
+// Valid values for ServiceType: MAINTENANCE, CLEANING, IT_SUPPORT, SECURITY, OTHER
+// Valid values for AreaType: Ward, Room, Office, Hallway, Other
+// Valid values for LinkType: QR_CODE, SMS, EMAIL
+
+model User {
+  id          String   @id @default(uuid())
+  email       String   @unique
+  password    String
+  firstName   String
+  lastName    String
+  phoneNumber String?
+  role        String   @default("REQUESTER") // ADMIN, STAFF, REQUESTER
+  department  String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  createdRequests Request[] @relation("CreatedBy")
+  assignedRequests Request[] @relation("AssignedTo")
+  activities      RequestActivity[]
+
+  @@map("users")
+}
+
+model Department {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  locations Location[]
+  requests  Request[]
+
+  @@map("departments")
+}
+
+model Block {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  locations Location[]
+
+  @@map("blocks")
+}
+
+model Location {
+  id          String    @id @default(uuid())
+  blockId     String
+  name        String
+  floor       Int?
+  areaType    String?   // Ward, Room, Office, Hallway, Other
+  departmentId String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  block      Block      @relation(fields: [blockId], references: [id], onDelete: Cascade)
+  department Department? @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  requests   Request[]
+
+  @@unique([blockId, name], name: "blockId_name")
+  @@map("locations")
+}
+
+model Request {
+  id            String        @id @default(uuid())
+  requestId     String        @unique
+  serviceType   String        // MAINTENANCE, CLEANING, IT_SUPPORT, SECURITY, OTHER
+  title         String
+  description   String?
+  priority      Int           @default(3) // 1 = Critical, 2 = High, 3 = Medium, 4 = Low
+  status        String        @default("NEW") // NEW, IN_PROGRESS, COMPLETED, CANCELLED, ON_HOLD
+  locationId    String?
+  departmentId  String?
+  createdById   String
+  assignedToId  String?
+  requestedBy   String?
+  estimatedTime Int?          // in minutes
+  completedAt   DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  // Relations
+  location    Location?       @relation(fields: [locationId], references: [id], onDelete: SetNull)
+  department  Department?      @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  createdBy   User             @relation("CreatedBy", fields: [createdById], references: [id])
+  assignedTo  User?            @relation("AssignedTo", fields: [assignedToId], references: [id], onDelete: SetNull)
+  activities  RequestActivity[]
+  requestLink RequestLink?
+
+  @@map("requests")
+}
+
+model RequestActivity {
+  id          String   @id @default(uuid())
+  requestId   String
+  userId      String
+  action      String
+  description String?
+  createdAt   DateTime @default(now())
+
+  // Relations
+  request Request @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("request_activities")
+}
+
+model RequestLink {
+  id          String    @id @default(uuid())
+  requestId   String    @unique
+  linkType    String    // QR_CODE, SMS, EMAIL
+  locationId  String?
+  phoneNumber String?
+  token       String    @unique
+  expiresAt   DateTime?
+  isUsed      Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  request Request @relation(fields: [requestId], references: [id], onDelete: Cascade)
+
+  @@map("request_links")
+}
