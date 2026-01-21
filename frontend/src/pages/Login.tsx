@@ -2,9 +2,9 @@ import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { ArrowRight, Mail, Lock, AlertCircle, Moon, User } from 'lucide-react';
 import { ApiError } from '../services/api';
-import GGHospitalLogo from '../components/GGHospitalLogo';
+// import GGHospitalLogo from '../components/GGHospitalLogo';
 // Uncomment and update the path when you have your logo image:
-// import logoImage from '../assets/gg-hospital-logo.png';
+import logoImage from '/assets/logo.png';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -45,7 +45,7 @@ export default function Login() {
           <div className="bg-white rounded-xl p-4 inline-block shadow-lg">
             {/* To use your image, replace the line below with: */}
             {/* <GGHospitalLogo src={logoImage} width={180} height={100} /> */}
-            <img src="/src/assets/logo.png" alt="GG Hospital Logo" width={120} height={75} />
+            <img src={logoImage} alt="GG Hospital Logo" width={120} height={75} />
           </div>
         </div>
 
