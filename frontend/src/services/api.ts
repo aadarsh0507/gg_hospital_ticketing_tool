@@ -1,5 +1,8 @@
 // Use proxy in development, or full URL in production
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || (import.meta.env.DEV ? '/api' : 'https://gg-hospital-ticketing-tool.onrender.com/api');
+  
+  // 'http://localhost:3001/api');
+  
 
 interface RequestOptions extends RequestInit {
   requiresAuth?: boolean;
