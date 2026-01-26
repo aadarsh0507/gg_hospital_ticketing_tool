@@ -9,7 +9,7 @@ export default function Register() {
     email: '',
     password: '',
     confirmPassword: '',
-    role: 'REQUESTER' as 'REQUESTER' | 'ADMIN'
+    role: 'REQUESTER' as 'REQUESTER' | 'ADMIN' | 'HOD'
   });
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -252,6 +252,8 @@ export default function Register() {
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   {formData.role === 'ADMIN' ? (
                     <Shield className="h-5 w-5 text-gray-400" />
+                  ) : formData.role === 'HOD' ? (
+                    <Shield className="h-5 w-5 text-gray-400" />
                   ) : (
                     <Ticket className="h-5 w-5 text-gray-400" />
                   )}
@@ -266,12 +268,15 @@ export default function Register() {
                   disabled={loading}
                 >
                   <option value="REQUESTER">Requester (Can create tickets)</option>
+                  <option value="HOD">Head of Department (HOD)</option>
                   <option value="ADMIN">Admin (Full access)</option>
                 </select>
               </div>
               <p className="mt-1 text-xs text-gray-500">
                 {formData.role === 'ADMIN' 
                   ? 'Admin users can view all requests and manage the system'
+                  : formData.role === 'HOD'
+                  ? 'HOD users can manage requests, view dashboard, create request links, manage users and services, schedule requests, and view reports'
                   : 'Requesters can create service requests and view their own requests'}
               </p>
             </div>

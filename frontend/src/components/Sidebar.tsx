@@ -13,7 +13,8 @@ import {
   Tag,
   Monitor,
   Calendar,
-  FileBarChart
+  FileBarChart,
+  Users
 } from 'lucide-react';
 
 import { X } from 'lucide-react';
@@ -30,6 +31,7 @@ export default function Sidebar({ activePage, onPageChange, isOpen = false, onCl
   const { user } = useAuth();
   const isAdmin = user?.role === 'ADMIN';
   const isRequester = user?.role === 'REQUESTER';
+  const isHOD = user?.role === 'HOD';
 
   // Base menu items available to all users
   const baseMenuItems = [
@@ -39,24 +41,26 @@ export default function Sidebar({ activePage, onPageChange, isOpen = false, onCl
 
   // Admin-only menu items
   const adminMenuItems = [
-    { id: 'metrics', label: 'Request Metrics', icon: BarChart3, roles: ['ADMIN', 'STAFF'] },
-    { id: 'leaderboard', label: 'Team Leaderboard', icon: Trophy, roles: ['ADMIN', 'STAFF'] },
-    { id: 'create-link', label: 'Create Request Link', icon: Link2, roles: ['ADMIN', 'STAFF'] },
     {
       id: 'manage',
       label: 'Manage Requests',
       icon: FileText,
-      roles: ['ADMIN', 'STAFF'],
+      roles: ['ADMIN', 'HOD'],
       submenu: [
-        { id: 'requests', label: 'All Requests', icon: ClipboardList, roles: ['ADMIN', 'STAFF'] }
+        { id: 'my-requests-manage', label: 'My Requests', icon: FileText, roles: ['HOD'] },
+        { id: 'requests', label: 'All Requests', icon: ClipboardList, roles: ['ADMIN', 'HOD'] }
       ]
     },
+    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['HOD'] },
+    { id: 'create-link', label: 'Create Request Link', icon: Link2, roles: ['ADMIN', 'HOD'] },
     {
       id: 'admin',
       label: 'Admin',
       icon: Settings,
-      roles: ['ADMIN'],
+      roles: ['ADMIN', 'HOD'],
       submenu: [
+        { id: 'users', label: 'Users', icon: Users, roles: ['ADMIN', 'HOD'] },
+        { id: 'service-creation', label: 'Service Creation', icon: Tag, roles: ['ADMIN', 'HOD'] },
         { id: 'locations', label: 'Locations', icon: MapPin, roles: ['ADMIN'] },
         { id: 'departments', label: 'Departments', icon: Building2, roles: ['ADMIN'] },
         { id: 'escalations', label: 'Escalations', icon: AlertTriangle, roles: ['ADMIN'] },
@@ -64,9 +68,11 @@ export default function Sidebar({ activePage, onPageChange, isOpen = false, onCl
         { id: 'labels', label: 'Labels', icon: Tag, roles: ['ADMIN'] }
       ]
     },
-    { id: 'app-display', label: 'App Display', icon: Monitor, roles: ['ADMIN'] },
-    { id: 'schedule', label: 'Schedule Requests', icon: Calendar, roles: ['ADMIN', 'STAFF'] },
-    { id: 'reports', label: 'Reports', icon: FileBarChart, roles: ['ADMIN', 'STAFF'] }
+    { id: 'schedule', label: 'Schedule Requests', icon: Calendar, roles: ['ADMIN', 'HOD'] },
+    { id: 'reports', label: 'Reports', icon: FileBarChart, roles: ['ADMIN', 'HOD'] },
+    { id: 'metrics', label: 'Request Metrics', icon: BarChart3, roles: ['ADMIN'] },
+    { id: 'leaderboard', label: 'Team Leaderboard', icon: Trophy, roles: ['ADMIN'] },
+    { id: 'app-display', label: 'App Display', icon: Monitor, roles: ['ADMIN'] }
   ];
 
   // Filter menu items based on user role

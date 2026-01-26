@@ -13,10 +13,10 @@ export const register = async (req, res, next) => {
     }
 
     // Validate role if provided
-    const validRoles = ['REQUESTER', 'ADMIN', 'STAFF'];
+    const validRoles = ['REQUESTER', 'ADMIN', 'STAFF', 'HOD'];
     const userRole = role || 'REQUESTER';
     if (!validRoles.includes(userRole)) {
-      throw new AppError('Invalid role. Must be REQUESTER, ADMIN, or STAFF', 400);
+      throw new AppError('Invalid role. Must be REQUESTER, ADMIN, STAFF, or HOD', 400);
     }
 
     // Check if user exists
