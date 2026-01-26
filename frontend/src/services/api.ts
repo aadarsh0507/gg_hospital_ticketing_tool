@@ -65,6 +65,10 @@ async function request<T>(
     if (error instanceof ApiError) {
       throw error;
     }
+    // Handle connection errors (backend not available)
+    if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+      throw new Error('Unable to connect to the server. Please ensure the backend server is running on port 3001.');
+    }
     throw new Error(`Network error: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 }
@@ -287,6 +291,126 @@ export const requestLinksApi = {
   deleteRequestLink: (id: string) =>
     request<any>(`/request-links/${id}`, {
       method: 'DELETE',
+    }),
+};
+
+// Services API
+export const servicesApi = {
+  getServices: (params?: {
+    search?: string;
+    isActive?: boolean;
+  }) => {
+    const queryParams = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          queryParams.append(key, String(value));
+        }
+      });
+    }
+    const query = queryParams.toString();
+    return request<{ services: any[] }>(`/services${query ? `?${query}` : ''}`);
+  },
+
+  getServiceById: (id: string) =>
+    request<{ service: any }>(`/services/${id}`),
+
+  createService: (data: {
+    name: string;
+    description?: string;
+    areaType?: string;
+    departmentId?: string;
+    locationId?: string;
+    slaEnabled?: boolean;
+    slaHours?: number;
+    slaMinutes?: number;
+    otpVerificationRequired?: boolean;
+    displayToCustomer?: boolean;
+    iconUrl?: string;
+  }) =>
+    request<{ message: string; service: any }>('/services', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  updateService: (id: string, data: {
+    name?: string;
+    description?: string;
+    areaType?: string;
+    departmentId?: string;
+    locationId?: string;
+    slaEnabled?: boolean;
+    slaHours?: number;
+    slaMinutes?: number;
+    otpVerificationRequired?: boolean;
+    displayToCustomer?: boolean;
+    iconUrl?: string;
+    isActive?: boolean;
+  }) =>
+    request<{ message: string; service: any }>(`/services/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+
+  deleteService: (id: string) =>
+    request<{ message: string }>(`/services/${id}`, {
+      method: 'DELETE',
+    }),
+};
+
+// Users API
+export const usersApi = {
+  getUsers: (params?: {
+    search?: string;
+    role?: string;
+    isActive?: boolean;
+  }) => {
+    const queryParams = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          queryParams.append(key, String(value));
+        }
+      });
+    }
+    const query = queryParams.toString();
+    return request<{
+      users: any[];
+      usersByDepartment: Array<{
+        name: string | null;
+        users: any[];
+      }>;
+      total: number;
+    }>(`/users${query ? `?${query}` : ''}`);
+  },
+
+  createUser: (data: {
+    email: string;
+    password: string;
+    firstName: string;
+    lastName: string;
+    phoneNumber?: string;
+    role?: string;
+    department?: string;
+  }) =>
+    request<{ message: string; user: any }>('/users', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  updateUser: (id: string, data: {
+    email?: string;
+    password?: string;
+    firstName?: string;
+    lastName?: string;
+    phoneNumber?: string;
+    role?: string;
+    department?: string;
+    isActive?: boolean;
+  }) =>
+    request<{ message: string; user: any }>(`/users/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
     }),
 };
 

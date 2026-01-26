@@ -20,8 +20,8 @@ router.get('/my-requests', getMyRequests);
 // Create request (all authenticated users can create requests)
 router.post('/', createRequest);
 
-// All requests (ADMIN only - can see all requests)
-router.get('/', authorize('ADMIN'), getRequests);
+// All requests (ADMIN, STAFF, and HOD can see all requests)
+router.get('/', authorize('ADMIN', 'STAFF', 'HOD'), getRequests);
 
 // Get single request (all authenticated users can view individual requests)
 router.get('/:id', getRequestById);

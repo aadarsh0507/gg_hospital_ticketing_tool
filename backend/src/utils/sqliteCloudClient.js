@@ -244,6 +244,62 @@ async function migrateSchema() {
       // Table doesn't exist yet, will be created by schema initialization
       // Silently ignore - table will be created by schema init
     }
+
+    // Check if requests table exists and add serviceId column if needed
+    try {
+      await query('SELECT * FROM requests LIMIT 1');
+      
+      // Check if serviceId column exists
+      let serviceIdExists = false;
+      try {
+        await query('SELECT "serviceId" FROM requests LIMIT 1');
+        serviceIdExists = true;
+      } catch (err) {
+        if (err.message && (err.message.includes('no such column') || err.message.includes('serviceId'))) {
+          serviceIdExists = false;
+        } else {
+          throw err;
+        }
+      }
+      
+      // Add column if it doesn't exist
+      if (!serviceIdExists) {
+        console.log('📝 Adding serviceId column to requests table...');
+        try {
+          await execute('ALTER TABLE requests ADD COLUMN "serviceId" TEXT');
+          console.log('✅ Added serviceId column to requests table');
+        } catch (alterErr) {
+          if (alterErr.message && (
+            alterErr.message.includes('duplicate column') || 
+            alterErr.message.includes('already exists')
+          )) {
+            // Column already exists, that's fine
+          } else {
+            console.warn('⚠️  Could not add serviceId column:', alterErr.message);
+          }
+        }
+      }
+    } catch (tableErr) {
+      // Table doesn't exist yet, will be created by schema initialization
+      // Silently ignore
+    }
+
+    // Drop and recreate services table if it exists (since user has no data)
+    try {
+      await query('SELECT * FROM services LIMIT 1');
+      // Table exists, drop it to recreate with correct schema
+      console.log('📝 Dropping existing services table to recreate with correct schema...');
+      try {
+        await execute('DROP TABLE services');
+        console.log('✅ Dropped services table');
+      } catch (dropErr) {
+        console.warn('⚠️  Could not drop services table:', dropErr.message);
+      }
+    } catch (tableErr) {
+      // Table doesn't exist yet, will be created by schema initialization
+      // Silently ignore
+    }
+
   } catch (error) {
     // Migration errors are not critical - suppress the error message
     // The error is expected if the column doesn't exist
@@ -301,6 +357,7 @@ export async function initializeSchema() {
       id TEXT PRIMARY KEY,
       "requestId" TEXT UNIQUE NOT NULL,
       "serviceType" TEXT NOT NULL,
+      "serviceId" TEXT,
       title TEXT NOT NULL,
       description TEXT,
       priority INTEGER NOT NULL DEFAULT 3,
@@ -316,6 +373,7 @@ export async function initializeSchema() {
       "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY ("locationId") REFERENCES locations(id) ON DELETE SET NULL,
       FOREIGN KEY ("departmentId") REFERENCES departments(id) ON DELETE SET NULL,
+      FOREIGN KEY ("serviceId") REFERENCES services(id) ON DELETE SET NULL,
       FOREIGN KEY ("createdById") REFERENCES users(id),
       FOREIGN KEY ("assignedToId") REFERENCES users(id) ON DELETE SET NULL
     )`,
@@ -342,17 +400,36 @@ export async function initializeSchema() {
       "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY ("requestId") REFERENCES requests(id) ON DELETE CASCADE
     )`,
+    `CREATE TABLE IF NOT EXISTS services (
+      id TEXT PRIMARY KEY,
+      name TEXT UNIQUE NOT NULL,
+      description TEXT,
+      "areaType" TEXT,
+      "departmentId" TEXT,
+      "locationId" TEXT,
+      "slaEnabled" INTEGER NOT NULL DEFAULT 0,
+      "slaHours" INTEGER NOT NULL DEFAULT 0,
+      "slaMinutes" INTEGER NOT NULL DEFAULT 0,
+      "otpVerificationRequired" INTEGER NOT NULL DEFAULT 0,
+      "displayToCustomer" INTEGER NOT NULL DEFAULT 1,
+      "iconUrl" TEXT,
+      "isActive" INTEGER NOT NULL DEFAULT 1,
+      "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY ("departmentId") REFERENCES departments(id) ON DELETE SET NULL,
+      FOREIGN KEY ("locationId") REFERENCES locations(id) ON DELETE SET NULL
+    )`,
   ];
 
   try {
+    // Run migrations first (to drop services table if needed)
+    await migrateSchema();
+    
     // Execute all CREATE TABLE statements
     for (const statement of createTablesSQL) {
       await execute(statement);
     }
     console.log('✅ Database schema initialized in SQLite Cloud');
-    
-    // Run migrations to add missing columns
-    await migrateSchema();
     
     return true;
   } catch (error) {

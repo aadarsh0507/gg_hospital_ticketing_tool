@@ -92,7 +92,7 @@ The server will run on `http://localhost:3001`
 ## Database Schema
 
 The application uses Prisma ORM with PostgreSQL. Key models include:
-- Users (with roles: ADMIN, STAFF, REQUESTER)
+- Users (with roles: ADMIN, STAFF, REQUESTER, HOD)
 - Requests (with statuses and SLA tracking)
 - Locations (Blocks, Areas, Rooms)
 - Departments

@@ -17,6 +17,8 @@ import AdminLabels from './pages/AdminLabels';
 import AppDisplay from './pages/AppDisplay';
 import ScheduleRequests from './pages/ScheduleRequests';
 import Reports from './pages/Reports';
+import AdminUsers from './pages/AdminUsers';
+import ServiceCreation from './pages/ServiceCreation';
 
 function AppContent() {
   const [activePage, setActivePage] = useState('dashboard');
@@ -40,6 +42,13 @@ function AppContent() {
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
+  // Restrict STAFF users to only dashboard and my-requests
+  useEffect(() => {
+    if (user?.role === 'STAFF' && activePage !== 'dashboard' && activePage !== 'my-requests') {
+      setActivePage('dashboard');
+    }
+  }, [user?.role, activePage]);
+
   const renderPage = () => {
     // Wait for user data before checking permissions
     if (userLoading) {
@@ -55,32 +64,51 @@ function AppContent() {
 
     const isAdmin = user?.role === 'ADMIN';
     const isRequester = user?.role === 'REQUESTER';
+    const isHOD = user?.role === 'HOD';
+    const isStaff = user?.role === 'STAFF';
+
+    // For STAFF users, only allow dashboard and my-requests
+    if (isStaff && activePage !== 'dashboard' && activePage !== 'my-requests') {
+      return <div className="p-6 text-center text-red-600">Insufficient permissions. Redirecting...</div>;
+    }
 
     switch (activePage) {
       case 'dashboard':
         return <Dashboard />;
       case 'my-requests':
         return <MyRequests />;
+      case 'my-requests-manage':
+        return <MyRequests />;
       case 'metrics':
-        if (!isAdmin && user?.role !== 'STAFF') {
+        if (!isAdmin) {
           return <div className="p-6 text-center text-red-600">Insufficient permissions</div>;
         }
         return <RequestMetrics />;
       case 'leaderboard':
-        if (!isAdmin && user?.role !== 'STAFF') {
+        if (!isAdmin) {
           return <div className="p-6 text-center text-red-600">Insufficient permissions</div>;
         }
         return <TeamLeaderboard />;
       case 'create-link':
-        if (!isAdmin && user?.role !== 'STAFF') {
+        if (!isAdmin && !isHOD) {
           return <div className="p-6 text-center text-red-600">Insufficient permissions</div>;
         }
         return <CreateRequestLink />;
       case 'requests':
-        if (!isAdmin && user?.role !== 'STAFF') {
+        if (!isAdmin && !isHOD) {
           return <div className="p-6 text-center text-red-600">Insufficient permissions</div>;
         }
         return <ManageRequests />;
+      case 'users':
+        if (!isAdmin && !isHOD) {
+          return <div className="p-6 text-center text-red-600">Insufficient permissions</div>;
+        }
+        return <AdminUsers />;
+      case 'service-creation':
+        if (!isAdmin && !isHOD) {
+          return <div className="p-6 text-center text-red-600">Insufficient permissions</div>;
+        }
+        return <ServiceCreation />;
       case 'locations':
         if (!isAdmin) {
           return <div className="p-6 text-center text-red-600">Insufficient permissions</div>;
@@ -112,12 +140,12 @@ function AppContent() {
         }
         return <AppDisplay />;
       case 'schedule':
-        if (!isAdmin && user?.role !== 'STAFF') {
+        if (!isAdmin && !isHOD) {
           return <div className="p-6 text-center text-red-600">Insufficient permissions</div>;
         }
         return <ScheduleRequests />;
       case 'reports':
-        if (!isAdmin && user?.role !== 'STAFF') {
+        if (!isAdmin && !isHOD) {
           return <div className="p-6 text-center text-red-600">Insufficient permissions</div>;
         }
         return <Reports />;

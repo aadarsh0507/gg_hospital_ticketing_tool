@@ -10,6 +10,8 @@ import locationRoutes from './routes/location.routes.js';
 import metricsRoutes from './routes/metrics.routes.js';
 import leaderboardRoutes from './routes/leaderboard.routes.js';
 import requestLinkRoutes from './routes/requestLink.routes.js';
+import serviceRoutes from './routes/service.routes.js';
+import userRoutes from './routes/user.routes.js';
 
 dotenv.config();
 
@@ -54,6 +56,8 @@ app.use('/api/locations', locationRoutes);
 app.use('/api/metrics', metricsRoutes);
 app.use('/api/leaderboard', leaderboardRoutes);
 app.use('/api/request-links', requestLinkRoutes);
+app.use('/api/services', serviceRoutes);
+app.use('/api/users', userRoutes);
 
 // Error handling
 app.use(errorHandler);

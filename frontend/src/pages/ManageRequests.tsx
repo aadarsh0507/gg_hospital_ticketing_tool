@@ -58,7 +58,26 @@ export default function ManageRequests() {
   }
 
   // Check if user has permission to view all requests
-  if (user.role === 'REQUESTER') {
+  // Only REQUESTER role is blocked; ADMIN, STAFF, and HOD can view all requests
+  // Normalize role to uppercase for comparison to handle any case variations
+  const userRole = (user.role || '').toUpperCase().trim();
+  const allowedRoles = ['ADMIN', 'STAFF', 'HOD'];
+  
+  // Debug: Always log for troubleshooting
+  console.log('ManageRequests - Permission check:', { 
+    userRole, 
+    originalRole: user.role, 
+    allowedRoles,
+    user: user,
+    isAllowed: allowedRoles.includes(userRole)
+  });
+  
+  // Allow access if role is in allowed list OR if role is not REQUESTER (more permissive for HOD)
+  // This handles cases where role might be stored differently
+  const isRequester = userRole === 'REQUESTER';
+  const isAllowed = allowedRoles.includes(userRole) || (!isRequester && userRole !== '');
+  
+  if (!isAllowed) {
     return (
       <div className="space-y-4 sm:space-y-6 w-full max-w-full overflow-x-hidden">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -67,6 +86,14 @@ export default function ManageRequests() {
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
           <p className="text-red-600 font-medium">Insufficient permissions</p>
           <p className="text-gray-600 mt-2">You don't have permission to view all requests. Please use "My Requests" to view your own requests.</p>
+          <p className="text-xs text-gray-500 mt-4">Your role: {user.role || 'Not set'}</p>
+          <p className="text-xs text-gray-500 mt-2">Normalized role: {userRole}</p>
+          <p className="text-xs text-blue-600 mt-4 cursor-pointer underline" onClick={() => {
+            localStorage.removeItem('authToken');
+            window.location.reload();
+          }}>
+            Click here to refresh your session
+          </p>
         </div>
       </div>
     );

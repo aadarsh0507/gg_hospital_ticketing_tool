@@ -11,7 +11,7 @@ datasource db {
 }
 
 // Note: SQLite doesn't support enums, so we use String types
-// Valid values for UserRole: ADMIN, STAFF, REQUESTER
+// Valid values for UserRole: ADMIN, STAFF, REQUESTER, HOD
 // Valid values for RequestStatus: NEW, IN_PROGRESS, COMPLETED, CANCELLED, ON_HOLD
 // Valid values for ServiceType: MAINTENANCE, CLEANING, IT_SUPPORT, SECURITY, OTHER
 // Valid values for AreaType: Ward, Room, Office, Hallway, Other
@@ -24,7 +24,7 @@ model User {
   firstName   String
   lastName    String
   phoneNumber String?
-  role        String   @default("REQUESTER") // ADMIN, STAFF, REQUESTER
+  role        String   @default("REQUESTER") // ADMIN, STAFF, REQUESTER, HOD
   department  String?
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
@@ -48,6 +48,7 @@ model Department {
   // Relations
   locations Location[]
   requests  Request[]
+  services  Service[]
 
   @@map("departments")
 }
@@ -79,6 +80,7 @@ model Location {
   block      Block      @relation(fields: [blockId], references: [id], onDelete: Cascade)
   department Department? @relation(fields: [departmentId], references: [id], onDelete: SetNull)
   requests   Request[]
+  services   Service[]
 
   @@unique([blockId, name], name: "blockId_name")
   @@map("locations")
@@ -88,6 +90,7 @@ model Request {
   id            String        @id @default(uuid())
   requestId     String        @unique
   serviceType   String        // MAINTENANCE, CLEANING, IT_SUPPORT, SECURITY, OTHER
+  serviceId    String?       // Reference to Service model
   title         String
   description   String?
   priority      Int           @default(3) // 1 = Critical, 2 = High, 3 = Medium, 4 = Low
@@ -105,6 +108,7 @@ model Request {
   // Relations
   location    Location?       @relation(fields: [locationId], references: [id], onDelete: SetNull)
   department  Department?      @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  service     Service?         @relation(fields: [serviceId], references: [id], onDelete: SetNull)
   createdBy   User             @relation("CreatedBy", fields: [createdById], references: [id])
   assignedTo  User?            @relation("AssignedTo", fields: [assignedToId], references: [id], onDelete: SetNull)
   activities  RequestActivity[]
@@ -144,4 +148,29 @@ model RequestLink {
   request Request @relation(fields: [requestId], references: [id], onDelete: Cascade)
 
   @@map("request_links")
+}
+
+model Service {
+  id                        String   @id @default(uuid())
+  name                      String   @unique
+  description               String?
+  areaType                  String?  // Room, Ward, Office, Lab, Operation Theater, ICU, Other
+  departmentId              String?
+  locationId                String?
+  slaEnabled                Boolean  @default(false)
+  slaHours                  Int      @default(0)
+  slaMinutes                Int      @default(0)
+  otpVerificationRequired   Boolean  @default(false)
+  displayToCustomer         Boolean  @default(true)
+  iconUrl                   String?
+  isActive                  Boolean  @default(true)
+  createdAt                 DateTime @default(now())
+  updatedAt                 DateTime @updatedAt
+
+  // Relations
+  department  Department?    @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  location    Location?      @relation(fields: [locationId], references: [id], onDelete: SetNull)
+  requests    Request[]
+
+  @@map("services")
 }
