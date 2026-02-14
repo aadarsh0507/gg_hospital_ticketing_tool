@@ -1,0 +1,396 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="app.netlify.gghospitalsticketingtool.twa"
+4    android:versionCode="4"
+5    android:versionName="4" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="21"
+9        android:targetSdkVersion="35" />
+10
+11    <uses-permission android:name="android.permission.INTERNET" />
+11-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:4:5-67
+11-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:4:22-64
+12    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+12-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:5:5-76
+12-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:5:22-74
+13
+14    <queries>
+14-->[com.google.androidbrowserhelper:androidbrowserhelper:2.6.2] C:\Users\board\.gradle\caches\8.11.1\transforms\5053e02be90783e54992393be394bb70\transformed\androidbrowserhelper-2.6.2\AndroidManifest.xml:22:5-30:15
+15        <intent>
+15-->[com.google.androidbrowserhelper:androidbrowserhelper:2.6.2] C:\Users\board\.gradle\caches\8.11.1\transforms\5053e02be90783e54992393be394bb70\transformed\androidbrowserhelper-2.6.2\AndroidManifest.xml:23:9-29:18
+16            <action android:name="android.intent.action.VIEW" />
+16-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:99:17-68
+16-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:99:25-66
+17
+18            <category android:name="android.intent.category.BROWSABLE" />
+18-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:101:17-77
+18-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:101:27-75
+19
+20            <data android:scheme="https" />
+20-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:102:17-104:46
+20-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:102:23-45
+21        </intent>
+22    </queries>
+23
+24    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+24-->[com.google.androidbrowserhelper:locationdelegation:1.1.2] C:\Users\board\.gradle\caches\8.11.1\transforms\6215e13210b05cc5715af15b5940fb9f\transformed\locationdelegation-1.1.2\AndroidManifest.xml:7:5-79
+24-->[com.google.androidbrowserhelper:locationdelegation:1.1.2] C:\Users\board\.gradle\caches\8.11.1\transforms\6215e13210b05cc5715af15b5940fb9f\transformed\locationdelegation-1.1.2\AndroidManifest.xml:7:22-76
+25    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+25-->[com.google.androidbrowserhelper:locationdelegation:1.1.2] C:\Users\board\.gradle\caches\8.11.1\transforms\6215e13210b05cc5715af15b5940fb9f\transformed\locationdelegation-1.1.2\AndroidManifest.xml:8:5-81
+25-->[com.google.androidbrowserhelper:locationdelegation:1.1.2] C:\Users\board\.gradle\caches\8.11.1\transforms\6215e13210b05cc5715af15b5940fb9f\transformed\locationdelegation-1.1.2\AndroidManifest.xml:8:22-78
+26
+27    <permission
+27-->[androidx.core:core:1.13.0] C:\Users\board\.gradle\caches\8.11.1\transforms\a5429f7b20c607b890f08b5283ad4ec0\transformed\core-1.13.0\AndroidManifest.xml:22:5-24:47
+28        android:name="app.netlify.gghospitalsticketingtool.twa.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+28-->[androidx.core:core:1.13.0] C:\Users\board\.gradle\caches\8.11.1\transforms\a5429f7b20c607b890f08b5283ad4ec0\transformed\core-1.13.0\AndroidManifest.xml:23:9-81
+29        android:protectionLevel="signature" />
+29-->[androidx.core:core:1.13.0] C:\Users\board\.gradle\caches\8.11.1\transforms\a5429f7b20c607b890f08b5283ad4ec0\transformed\core-1.13.0\AndroidManifest.xml:24:9-44
+30
+31    <uses-permission android:name="app.netlify.gghospitalsticketingtool.twa.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+31-->[androidx.core:core:1.13.0] C:\Users\board\.gradle\caches\8.11.1\transforms\a5429f7b20c607b890f08b5283ad4ec0\transformed\core-1.13.0\AndroidManifest.xml:26:5-97
+31-->[androidx.core:core:1.13.0] C:\Users\board\.gradle\caches\8.11.1\transforms\a5429f7b20c607b890f08b5283ad4ec0\transformed\core-1.13.0\AndroidManifest.xml:26:22-94
+32
+33    <application
+33-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:7:5-138:19
+34        android:name="app.netlify.gghospitalsticketingtool.twa.Application"
+34-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:8:9-76
+35        android:allowBackup="true"
+35-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:9:9-35
+36        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+36-->[androidx.core:core:1.13.0] C:\Users\board\.gradle\caches\8.11.1\transforms\a5429f7b20c607b890f08b5283ad4ec0\transformed\core-1.13.0\AndroidManifest.xml:28:18-86
+37        android:debuggable="true"
+38        android:extractNativeLibs="true"
+39        android:icon="@mipmap/ic_launcher"
+39-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:10:9-43
+40        android:label="@string/appName"
+40-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:11:9-40
+41        android:manageSpaceActivity="com.google.androidbrowserhelper.trusted.ManageDataLauncherActivity"
+41-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:12:9-105
+42        android:supportsRtl="true"
+42-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:13:9-35
+43        android:theme="@style/Theme.Twa" >
+43-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:14:9-41
+44        <meta-data
+44-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:16:9-18:58
+45            android:name="asset_statements"
+45-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:17:13-44
+46            android:resource="@string/assetStatements" />
+46-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:18:13-55
+47        <meta-data
+47-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:20:9-22:54
+48            android:name="web_manifest_url"
+48-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:21:13-44
+49            android:value="@string/webManifestUrl" />
+49-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:22:13-51
+50        <meta-data
+50-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:24:9-26:52
+51            android:name="twa_generator"
+51-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:25:13-41
+52            android:value="@string/generatorApp" />
+52-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:26:13-49
+53
+54        <activity
+54-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:28:9-39:20
+55            android:name="com.google.androidbrowserhelper.trusted.ManageDataLauncherActivity"
+55-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:28:19-100
+56            android:enabled="true"
+56-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:30:13-35
+57            android:excludeFromRecents="true"
+57-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:31:13-46
+58            android:exported="false" >
+58-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:29:13-37
+59            <meta-data
+59-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:32:13-34:53
+60                android:name="android.support.customtabs.trusted.MANAGE_SPACE_URL"
+60-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:33:17-83
+61                android:value="@string/launchUrl" />
+61-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:34:17-50
+62
+63            <intent-filter>
+63-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:35:13-38:29
+64                <action android:name="android.intent.action.APPLICATION_PREFERENCES" />
+64-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:36:17-88
+64-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:36:25-85
+65
+66                <category android:name="android.intent.category.DEFAULT" />
+66-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:37:17-76
+66-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:37:27-73
+67            </intent-filter>
+68        </activity>
+69        <activity
+69-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:41:9-106:20
+70            android:name="app.netlify.gghospitalsticketingtool.twa.LauncherActivity"
+70-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:41:19-91
+71            android:alwaysRetainTaskState="true"
+71-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:42:13-49
+72            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
+72-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:45:13-87
+73            android:exported="true"
+73-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:44:13-36
+74            android:label="@string/launcherName" >
+74-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:43:13-49
+75            <meta-data
+75-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:46:13-47:53
+76                android:name="android.support.customtabs.trusted.DEFAULT_URL"
+76-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:46:24-85
+77                android:value="@string/launchUrl" />
+77-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:47:17-50
+78            <meta-data
+78-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:49:13-51:58
+79                android:name="android.support.customtabs.trusted.STATUS_BAR_COLOR"
+79-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:50:17-83
+80                android:resource="@color/colorPrimary" />
+80-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:51:17-55
+81            <meta-data
+81-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:53:13-55:62
+82                android:name="android.support.customtabs.trusted.STATUS_BAR_COLOR_DARK"
+82-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:54:17-88
+83                android:resource="@color/colorPrimaryDark" />
+83-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:55:17-59
+84            <meta-data
+84-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:57:13-59:61
+85                android:name="android.support.customtabs.trusted.NAVIGATION_BAR_COLOR"
+85-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:58:17-87
+86                android:resource="@color/navigationColor" />
+86-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:59:17-58
+87            <meta-data
+87-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:61:13-63:65
+88                android:name="android.support.customtabs.trusted.NAVIGATION_BAR_COLOR_DARK"
+88-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:62:17-92
+89                android:resource="@color/navigationColorDark" />
+89-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:63:17-62
+90            <meta-data
+90-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:65:13-67:68
+91                android:name="androidx.browser.trusted.NAVIGATION_BAR_DIVIDER_COLOR"
+91-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:66:17-85
+92                android:resource="@color/navigationDividerColor" />
+92-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:67:17-65
+93            <meta-data
+93-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:69:13-71:72
+94                android:name="androidx.browser.trusted.NAVIGATION_BAR_DIVIDER_COLOR_DARK"
+94-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:70:17-90
+95                android:resource="@color/navigationDividerColorDark" />
+95-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:71:17-69
+96            <meta-data
+96-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:73:13-74:54
+97                android:name="android.support.customtabs.trusted.SPLASH_IMAGE_DRAWABLE"
+97-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:73:24-95
+98                android:resource="@drawable/splash" />
+98-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:74:17-52
+99            <meta-data
+99-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:76:13-77:60
+100                android:name="android.support.customtabs.trusted.SPLASH_SCREEN_BACKGROUND_COLOR"
+100-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:76:24-104
+101                android:resource="@color/backgroundColor" />
+101-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:77:17-58
+102            <meta-data
+102-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:79:13-80:71
+103                android:name="android.support.customtabs.trusted.SPLASH_SCREEN_FADE_OUT_DURATION"
+103-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:79:24-105
+104                android:value="@integer/splashScreenFadeOutDuration" />
+104-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:80:17-69
+105            <meta-data
+105-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:82:13-83:60
+106                android:name="android.support.customtabs.trusted.FILE_PROVIDER_AUTHORITY"
+106-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:82:24-97
+107                android:value="@string/providerAuthority" />
+107-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:83:17-58
+108            <meta-data
+108-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:85:13-97
+109                android:name="android.app.shortcuts"
+109-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:85:24-60
+110                android:resource="@xml/shortcuts" />
+110-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:85:61-94
+111            <meta-data
+111-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:87:13-88:56
+112                android:name="android.support.customtabs.trusted.FALLBACK_STRATEGY"
+112-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:87:24-91
+113                android:value="@string/fallbackType" />
+113-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:88:17-53
+114            <meta-data
+114-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:90:13-91:54
+115                android:name="android.support.customtabs.trusted.SCREEN_ORIENTATION"
+115-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:90:24-92
+116                android:value="@string/orientation" />
+116-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:91:17-52
+117
+118            <intent-filter>
+118-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:93:13-96:29
+119                <action android:name="android.intent.action.MAIN" />
+119-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:94:17-69
+119-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:94:25-66
+120
+121                <category android:name="android.intent.category.LAUNCHER" />
+121-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:95:17-77
+121-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:95:27-74
+122            </intent-filter>
+123            <intent-filter android:autoVerify="true" >
+123-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:98:13-105:29
+123-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:98:28-53
+124                <action android:name="android.intent.action.VIEW" />
+124-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:99:17-68
+124-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:99:25-66
+125
+126                <category android:name="android.intent.category.DEFAULT" />
+126-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:37:17-76
+126-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:37:27-73
+127                <category android:name="android.intent.category.BROWSABLE" />
+127-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:101:17-77
+127-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:101:27-75
+128
+129                <data
+129-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:102:17-104:46
+130                    android:host="@string/hostName"
+130-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:103:21-52
+131                    android:pathPrefix="/"
+131-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:104:21-43
+132                    android:scheme="https" />
+132-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:102:23-45
+133            </intent-filter>
+134        </activity>
+135        <activity android:name="com.google.androidbrowserhelper.trusted.FocusActivity" />
+135-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:108:9-90
+135-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:108:19-87
+136        <activity
+136-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:110:9-111:62
+137            android:name="com.google.androidbrowserhelper.trusted.WebViewFallbackActivity"
+137-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:110:19-97
+138            android:configChanges="orientation|screenSize" />
+138-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:111:13-59
+139
+140        <provider
+140-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:113:9-121:20
+141            android:name="androidx.core.content.FileProvider"
+141-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:114:13-62
+142            android:authorities="app.netlify.gghospitalsticketingtool.twa.fileprovider"
+142-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:115:13-88
+143            android:exported="false"
+143-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:117:13-37
+144            android:grantUriPermissions="true" >
+144-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:116:13-47
+145            <meta-data
+145-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:118:13-120:53
+146                android:name="android.support.FILE_PROVIDER_PATHS"
+146-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:119:17-67
+147                android:resource="@xml/filepaths" />
+147-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:120:17-50
+148        </provider>
+149
+150        <service
+150-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:123:9-134:19
+151            android:name="app.netlify.gghospitalsticketingtool.twa.DelegationService"
+151-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:124:13-86
+152            android:enabled="@bool/enableNotification"
+152-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:125:13-55
+153            android:exported="@bool/enableNotification" >
+153-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:126:13-56
+154            <meta-data
+154-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:127:13-129:69
+155                android:name="android.support.customtabs.trusted.SMALL_ICON"
+155-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:128:17-77
+156                android:resource="@drawable/ic_notification_icon" />
+156-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:129:17-66
+157
+158            <intent-filter>
+158-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:130:13-133:29
+159                <action android:name="android.support.customtabs.trusted.TRUSTED_WEB_ACTIVITY_SERVICE" />
+159-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:131:17-105
+159-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:131:25-103
+160
+161                <category android:name="android.intent.category.DEFAULT" />
+161-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:37:17-76
+161-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:37:27-73
+162            </intent-filter>
+163        </service>
+164
+165        <activity android:name="com.google.androidbrowserhelper.trusted.NotificationPermissionRequestActivity" />
+165-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:136:9-114
+165-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:136:19-111
+166        <activity android:name="com.google.androidbrowserhelper.locationdelegation.PermissionRequestActivity" />
+166-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:137:9-112
+166-->D:\React Projects\gg_hospital_ticketing_tool\frontend\app\src\main\AndroidManifest.xml:137:19-110
+167        <activity
+167-->[com.google.android.gms:play-services-base:18.1.0] C:\Users\board\.gradle\caches\8.11.1\transforms\02e37f92c71ffadabef41ae6f5feca22\transformed\play-services-base-18.1.0\AndroidManifest.xml:20:9-22:45
+168            android:name="com.google.android.gms.common.api.GoogleApiActivity"
+168-->[com.google.android.gms:play-services-base:18.1.0] C:\Users\board\.gradle\caches\8.11.1\transforms\02e37f92c71ffadabef41ae6f5feca22\transformed\play-services-base-18.1.0\AndroidManifest.xml:20:19-85
+169            android:exported="false"
+169-->[com.google.android.gms:play-services-base:18.1.0] C:\Users\board\.gradle\caches\8.11.1\transforms\02e37f92c71ffadabef41ae6f5feca22\transformed\play-services-base-18.1.0\AndroidManifest.xml:22:19-43
+170            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+170-->[com.google.android.gms:play-services-base:18.1.0] C:\Users\board\.gradle\caches\8.11.1\transforms\02e37f92c71ffadabef41ae6f5feca22\transformed\play-services-base-18.1.0\AndroidManifest.xml:21:19-78
+171
+172        <meta-data
+172-->[com.google.android.gms:play-services-basement:18.1.0] C:\Users\board\.gradle\caches\8.11.1\transforms\d176d6696a4772b4ce2a6021c61f9202\transformed\play-services-basement-18.1.0\AndroidManifest.xml:21:9-23:69
+173            android:name="com.google.android.gms.version"
+173-->[com.google.android.gms:play-services-basement:18.1.0] C:\Users\board\.gradle\caches\8.11.1\transforms\d176d6696a4772b4ce2a6021c61f9202\transformed\play-services-basement-18.1.0\AndroidManifest.xml:22:13-58
+174            android:value="@integer/google_play_services_version" />
+174-->[com.google.android.gms:play-services-basement:18.1.0] C:\Users\board\.gradle\caches\8.11.1\transforms\d176d6696a4772b4ce2a6021c61f9202\transformed\play-services-basement-18.1.0\AndroidManifest.xml:23:13-66
+175
+176        <provider
+176-->[androidx.emoji2:emoji2:1.3.0] C:\Users\board\.gradle\caches\8.11.1\transforms\5cb7738f5242d8c4e38c8ffa2b265b31\transformed\emoji2-1.3.0\AndroidManifest.xml:24:9-32:20
+177            android:name="androidx.startup.InitializationProvider"
+177-->[androidx.emoji2:emoji2:1.3.0] C:\Users\board\.gradle\caches\8.11.1\transforms\5cb7738f5242d8c4e38c8ffa2b265b31\transformed\emoji2-1.3.0\AndroidManifest.xml:25:13-67
+178            android:authorities="app.netlify.gghospitalsticketingtool.twa.androidx-startup"
+178-->[androidx.emoji2:emoji2:1.3.0] C:\Users\board\.gradle\caches\8.11.1\transforms\5cb7738f5242d8c4e38c8ffa2b265b31\transformed\emoji2-1.3.0\AndroidManifest.xml:26:13-68
+179            android:exported="false" >
+179-->[androidx.emoji2:emoji2:1.3.0] C:\Users\board\.gradle\caches\8.11.1\transforms\5cb7738f5242d8c4e38c8ffa2b265b31\transformed\emoji2-1.3.0\AndroidManifest.xml:27:13-37
+180            <meta-data
+180-->[androidx.emoji2:emoji2:1.3.0] C:\Users\board\.gradle\caches\8.11.1\transforms\5cb7738f5242d8c4e38c8ffa2b265b31\transformed\emoji2-1.3.0\AndroidManifest.xml:29:13-31:52
+181                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+181-->[androidx.emoji2:emoji2:1.3.0] C:\Users\board\.gradle\caches\8.11.1\transforms\5cb7738f5242d8c4e38c8ffa2b265b31\transformed\emoji2-1.3.0\AndroidManifest.xml:30:17-75
+182                android:value="androidx.startup" />
+182-->[androidx.emoji2:emoji2:1.3.0] C:\Users\board\.gradle\caches\8.11.1\transforms\5cb7738f5242d8c4e38c8ffa2b265b31\transformed\emoji2-1.3.0\AndroidManifest.xml:31:17-49
+183            <meta-data
+183-->[androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\board\.gradle\caches\8.11.1\transforms\4bc52031417e9743197e36b704fe409f\transformed\lifecycle-process-2.6.2\AndroidManifest.xml:29:13-31:52
+184                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+184-->[androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\board\.gradle\caches\8.11.1\transforms\4bc52031417e9743197e36b704fe409f\transformed\lifecycle-process-2.6.2\AndroidManifest.xml:30:17-78
+185                android:value="androidx.startup" />
+185-->[androidx.lifecycle:lifecycle-process:2.6.2] C:\Users\board\.gradle\caches\8.11.1\transforms\4bc52031417e9743197e36b704fe409f\transformed\lifecycle-process-2.6.2\AndroidManifest.xml:31:17-49
+186            <meta-data
+186-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\board\.gradle\caches\8.11.1\transforms\bb4a0d32d1b17a1dcea0cf71d2bde5e0\transformed\profileinstaller-1.3.1\AndroidManifest.xml:29:13-31:52
+187                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
+187-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\board\.gradle\caches\8.11.1\transforms\bb4a0d32d1b17a1dcea0cf71d2bde5e0\transformed\profileinstaller-1.3.1\AndroidManifest.xml:30:17-85
+188                android:value="androidx.startup" />
+188-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\board\.gradle\caches\8.11.1\transforms\bb4a0d32d1b17a1dcea0cf71d2bde5e0\transformed\profileinstaller-1.3.1\AndroidManifest.xml:31:17-49
+189        </provider>
+190
+191        <receiver
+191-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\board\.gradle\caches\8.11.1\transforms\bb4a0d32d1b17a1dcea0cf71d2bde5e0\transformed\profileinstaller-1.3.1\AndroidManifest.xml:34:9-52:20
+192            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+192-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\board\.gradle\caches\8.11.1\transforms\bb4a0d32d1b17a1dcea0cf71d2bde5e0\transformed\profileinstaller-1.3.1\AndroidManifest.xml:35:13-76
+193            android:directBootAware="false"
+193-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\board\.gradle\caches\8.11.1\transforms\bb4a0d32d1b17a1dcea0cf71d2bde5e0\transformed\profileinstaller-1.3.1\AndroidManifest.xml:36:13-44
+194            android:enabled="true"
+194-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\board\.gradle\caches\8.11.1\transforms\bb4a0d32d1b17a1dcea0cf71d2bde5e0\transformed\profileinstaller-1.3.1\AndroidManifest.xml:37:13-35
+195            android:exported="true"
+195-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\board\.gradle\caches\8.11.1\transforms\bb4a0d32d1b17a1dcea0cf71d2bde5e0\transformed\profileinstaller-1.3.1\AndroidManifest.xml:38:13-36
+196            android:permission="android.permission.DUMP" >
+196-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\board\.gradle\caches\8.11.1\transforms\bb4a0d32d1b17a1dcea0cf71d2bde5e0\transformed\profileinstaller-1.3.1\AndroidManifest.xml:39:13-57
+197            <intent-filter>
+197-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\board\.gradle\caches\8.11.1\transforms\bb4a0d32d1b17a1dcea0cf71d2bde5e0\transformed\profileinstaller-1.3.1\AndroidManifest.xml:40:13-42:29
+198                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
+198-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\board\.gradle\caches\8.11.1\transforms\bb4a0d32d1b17a1dcea0cf71d2bde5e0\transformed\profileinstaller-1.3.1\AndroidManifest.xml:41:17-91
+198-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\board\.gradle\caches\8.11.1\transforms\bb4a0d32d1b17a1dcea0cf71d2bde5e0\transformed\profileinstaller-1.3.1\AndroidManifest.xml:41:25-88
+199            </intent-filter>
+200            <intent-filter>
+200-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\board\.gradle\caches\8.11.1\transforms\bb4a0d32d1b17a1dcea0cf71d2bde5e0\transformed\profileinstaller-1.3.1\AndroidManifest.xml:43:13-45:29
+201                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
+201-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\board\.gradle\caches\8.11.1\transforms\bb4a0d32d1b17a1dcea0cf71d2bde5e0\transformed\profileinstaller-1.3.1\AndroidManifest.xml:44:17-85
+201-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\board\.gradle\caches\8.11.1\transforms\bb4a0d32d1b17a1dcea0cf71d2bde5e0\transformed\profileinstaller-1.3.1\AndroidManifest.xml:44:25-82
+202            </intent-filter>
+203            <intent-filter>
+203-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\board\.gradle\caches\8.11.1\transforms\bb4a0d32d1b17a1dcea0cf71d2bde5e0\transformed\profileinstaller-1.3.1\AndroidManifest.xml:46:13-48:29
+204                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
+204-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\board\.gradle\caches\8.11.1\transforms\bb4a0d32d1b17a1dcea0cf71d2bde5e0\transformed\profileinstaller-1.3.1\AndroidManifest.xml:47:17-88
+204-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\board\.gradle\caches\8.11.1\transforms\bb4a0d32d1b17a1dcea0cf71d2bde5e0\transformed\profileinstaller-1.3.1\AndroidManifest.xml:47:25-85
+205            </intent-filter>
+206            <intent-filter>
+206-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\board\.gradle\caches\8.11.1\transforms\bb4a0d32d1b17a1dcea0cf71d2bde5e0\transformed\profileinstaller-1.3.1\AndroidManifest.xml:49:13-51:29
+207                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
+207-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\board\.gradle\caches\8.11.1\transforms\bb4a0d32d1b17a1dcea0cf71d2bde5e0\transformed\profileinstaller-1.3.1\AndroidManifest.xml:50:17-95
+207-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\board\.gradle\caches\8.11.1\transforms\bb4a0d32d1b17a1dcea0cf71d2bde5e0\transformed\profileinstaller-1.3.1\AndroidManifest.xml:50:25-92
+208            </intent-filter>
+209        </receiver>
+210    </application>
+211
+212</manifest>

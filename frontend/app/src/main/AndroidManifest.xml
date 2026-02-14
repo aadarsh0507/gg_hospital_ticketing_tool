@@ -1,32 +1,19 @@
-<!--
-    Copyright 2019 Google Inc. All Rights Reserved.
-
-     Licensed under the Apache License, Version 2.0 (the "License");
-     you may not use this file except in compliance with the License.
-     You may obtain a copy of the License at
-
-         http://www.apache.org/licenses/LICENSE-2.0
-
-     Unless required by applicable law or agreed to in writing, software
-     distributed under the License is distributed on an "AS IS" BASIS,
-     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-     See the License for the specific language governing permissions and
-     limitations under the License.
--->
-
+<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="app.netlify.gghospitalsticketingtool.twa">
 
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
-        android:name="Application"
+        android:name="app.netlify.gghospitalsticketingtool.twa.Application"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/appName"
         android:manageSpaceActivity="com.google.androidbrowserhelper.trusted.ManageDataLauncherActivity"
         android:supportsRtl="true"
-        android:theme="@android:style/Theme.Translucent.NoTitleBar">
+        android:theme="@style/Theme.Twa">
 
         <meta-data
             android:name="asset_statements"
@@ -53,10 +40,11 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="LauncherActivity"
+        <activity android:name="app.netlify.gghospitalsticketingtool.twa.LauncherActivity"
             android:alwaysRetainTaskState="true"
             android:label="@string/launcherName"
-            android:exported="true">
+            android:exported="true"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden">
             <meta-data android:name="android.support.customtabs.trusted.DEFAULT_URL"
                 android:value="@string/launchUrl" />
 
@@ -77,11 +65,11 @@
                 android:resource="@color/navigationColorDark" />
 
             <meta-data
-                android:name="androix.browser.trusted.NAVIGATION_BAR_DIVIDER_COLOR"
+                android:name="androidx.browser.trusted.NAVIGATION_BAR_DIVIDER_COLOR"
                 android:resource="@color/navigationDividerColor" />
 
             <meta-data
-                android:name="androix.browser.trusted.NAVIGATION_BAR_DIVIDER_COLOR_DARK"
+                android:name="androidx.browser.trusted.NAVIGATION_BAR_DIVIDER_COLOR_DARK"
                 android:resource="@color/navigationDividerColorDark" />
 
             <meta-data android:name="android.support.customtabs.trusted.SPLASH_IMAGE_DRAWABLE"
@@ -126,7 +114,7 @@
 
         <provider
             android:name="androidx.core.content.FileProvider"
-            android:authorities="@string/providerAuthority"
+            android:authorities="app.netlify.gghospitalsticketingtool.twa.fileprovider"
             android:grantUriPermissions="true"
             android:exported="false">
             <meta-data
@@ -135,7 +123,7 @@
         </provider>
 
         <service
-            android:name=".DelegationService"
+            android:name="app.netlify.gghospitalsticketingtool.twa.DelegationService"
             android:enabled="@bool/enableNotification"
             android:exported="@bool/enableNotification">
             <meta-data

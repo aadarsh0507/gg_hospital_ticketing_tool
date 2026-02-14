@@ -1,16 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- Simple splash background using the app's backgroundColor -->
     <item android:drawable="@color/backgroundColor" />
 </layer-list>
-
-
-
-
-
-
-
-
-
-
-
