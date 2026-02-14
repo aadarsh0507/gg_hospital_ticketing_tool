@@ -1,9 +1,45 @@
-// Use proxy in development, or full URL in production
+// API Base URL Configuration
+// Priority: VITE_API_BASE_URL env var > DEV mode proxy > Production default
+// For mobile apps, set VITE_API_BASE_URL to your server's IP address
+// Example: VITE_API_BASE_URL=http://192.168.137.204:3001/api
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || (import.meta.env.DEV ? '/api' : 'http://192.168.137.204:3001/api');
+// Detect if running in Capacitor (native mobile app)
+const isCapacitor = typeof window !== 'undefined' && 
+  (window as any).Capacitor !== undefined;
+
+// Get API base URL
+function getApiBaseUrl(): string {
+  // 1. Check for explicit environment variable (highest priority)
+  if (import.meta.env.VITE_API_BASE_URL) {
+    return import.meta.env.VITE_API_BASE_URL;
+  }
+
+  // 2. In development mode, use proxy (for web browser)
+  if (import.meta.env.DEV && !isCapacitor) {
+    return '/api';
+  }
+
+  // 3. For production or mobile app, use full URL
+  // Default to localhost for emulator, or set VITE_API_BASE_URL for physical device
+  // For physical device, replace with your computer's local IP address
+  const defaultProductionUrl = 'http://192.168.137.204:3001/api';
   
-  // 'http://localhost:3001/api');
-  
+  // If running in Capacitor, we need a full URL (can't use proxy)
+  if (isCapacitor) {
+    return defaultProductionUrl;
+  }
+
+  // Fallback for production web builds
+  return defaultProductionUrl;
+}
+
+const API_BASE_URL = getApiBaseUrl();
+
+// Log API URL in development for debugging
+if (import.meta.env.DEV) {
+  console.log('API Base URL:', API_BASE_URL);
+  console.log('Running in Capacitor:', isCapacitor);
+}
 
 interface RequestOptions extends RequestInit {
   requiresAuth?: boolean;

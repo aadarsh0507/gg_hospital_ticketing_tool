@@ -11,7 +11,6 @@ export default defineConfig({
     viteStaticCopy({
       targets: [
         { src: 'icons/*', dest: 'icons' },
-        { src: 'assets/logo.png', dest: 'assets' },
       ],
     }),
     VitePWA({

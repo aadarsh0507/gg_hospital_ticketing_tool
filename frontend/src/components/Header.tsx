@@ -3,6 +3,8 @@ import { Menu, HelpCircle, User, LogOut, ChevronDown, Plus } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext';
 import ServiceRequestModal from './ServiceRequestModal';
 import PowerButton from './PowerButton';
+import { Capacitor } from '@capacitor/core';
+import { StatusBar, Style } from '@capacitor/status-bar';
 
 interface HeaderProps {
   onMenuClick?: () => void;
@@ -11,8 +13,43 @@ interface HeaderProps {
 export default function Header({ onMenuClick }: HeaderProps) {
   const [showDropdown, setShowDropdown] = useState(false);
   const [showServiceModal, setShowServiceModal] = useState(false);
+  const [headerPadding, setHeaderPadding] = useState('15px');
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { user, logout } = useAuth();
+
+  useEffect(() => {
+    // Calculate header padding for mobile devices
+    if (Capacitor.isNativePlatform()) {
+      const platform = Capacitor.getPlatform();
+      
+      if (platform === 'android') {
+        // For Android: Use 60px to ensure content is well below status bar
+        // This accounts for status bar (24-48px) + 15px spacing + buffer
+        setHeaderPadding('60px');
+        
+        // Force apply padding immediately
+        const headerElement = document.querySelector('header');
+        if (headerElement) {
+          (headerElement as HTMLElement).style.paddingTop = '60px';
+        }
+      } else if (platform === 'ios') {
+        // For iOS: status bar (44px with notch, 20px without) + 15px spacing
+        const hasNotch = window.screen.height >= 812;
+        const padding = hasNotch ? '59px' : '35px';
+        setHeaderPadding(padding);
+        
+        const headerElement = document.querySelector('header');
+        if (headerElement) {
+          (headerElement as HTMLElement).style.paddingTop = padding;
+        }
+      } else {
+        setHeaderPadding('15px');
+      }
+    } else {
+      // Web browser - no extra padding needed
+      setHeaderPadding('15px');
+    }
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -32,8 +69,15 @@ export default function Header({ onMenuClick }: HeaderProps) {
   };
 
   return (
-    <header className="bg-white border-b border-gray-200 sticky top-0 z-40 w-full max-w-full overflow-visible">
-      <div className="flex items-center justify-between px-3 sm:px-4 lg:px-6 py-3 sm:py-4 w-full max-w-full">
+    <header 
+      className="bg-white border-b border-gray-200 sticky top-0 z-40 w-full max-w-full overflow-visible mobile-header-padding"
+      style={{
+        paddingTop: headerPadding,
+        marginTop: '0',
+        position: 'relative',
+      }}
+    >
+      <div className="flex items-center justify-between px-2 sm:px-3 md:px-4 lg:px-6 py-2.5 sm:py-3 md:py-4 w-full max-w-full min-w-0">
         <button 
           onClick={onMenuClick}
           className="lg:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -42,40 +86,40 @@ export default function Header({ onMenuClick }: HeaderProps) {
         </button>
         <div className="hidden lg:block w-64"></div>
 
-        <div className="flex items-center gap-2 sm:gap-3 relative flex-shrink-0">
+        <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 relative flex-shrink-0 min-w-0">
           {/* Power Button - System Status */}
           <PowerButton />
 
-          <button className="p-2 hover:bg-gray-100 rounded-full transition-colors flex-shrink-0">
-            <HelpCircle className="w-5 h-5 text-gray-600" />
+          <button className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-full transition-colors flex-shrink-0" aria-label="Help">
+            <HelpCircle className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
           </button>
 
           {/* Service Request Button */}
           <button
             onClick={() => setShowServiceModal(true)}
-            className="flex items-center gap-2 px-2 sm:px-3 md:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm flex-shrink-0"
+            className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm flex-shrink-0 text-xs sm:text-sm"
             title="Create Service Request"
           >
-            <Plus className="w-4 h-4" />
-            <span className="hidden sm:inline text-sm font-medium">Service Request</span>
+            <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <span className="hidden sm:inline font-medium">Service Request</span>
           </button>
 
           {/* User Profile Dropdown */}
-          <div className="relative flex-shrink-0" ref={dropdownRef}>
+          <div className="relative flex-shrink-0 min-w-0" ref={dropdownRef}>
             <button
               onClick={() => setShowDropdown(!showDropdown)}
-              className="flex items-center gap-1 sm:gap-2 px-1 sm:px-3 py-2 hover:bg-gray-100 rounded-lg transition-colors"
+              className="flex items-center gap-1 sm:gap-2 px-1 sm:px-2 md:px-3 py-1.5 sm:py-2 hover:bg-gray-100 rounded-lg transition-colors min-w-0"
             >
-              <div className="w-8 h-8 sm:w-9 sm:h-9 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
-                <User className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+              <div className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+                <User className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 text-white" />
               </div>
-              <div className="hidden sm:block text-left">
-                <p className="text-sm font-medium text-gray-900">
+              <div className="hidden sm:block text-left min-w-0 max-w-[120px] md:max-w-none">
+                <p className="text-xs sm:text-sm font-medium text-gray-900 truncate">
                   {user?.firstName} {user?.lastName}
                 </p>
-                <p className="text-xs text-gray-500">{user?.email}</p>
+                <p className="text-xs text-gray-500 truncate hidden md:block">{user?.email}</p>
               </div>
-              <ChevronDown className="w-4 h-4 text-gray-600 hidden sm:block" />
+              <ChevronDown className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-600 hidden sm:block flex-shrink-0" />
             </button>
 
             {showDropdown && (

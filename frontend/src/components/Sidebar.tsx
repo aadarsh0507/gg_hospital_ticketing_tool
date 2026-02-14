@@ -93,11 +93,18 @@ export default function Sidebar({ activePage, onPageChange, isOpen = false, onCl
   return (
     <>
       <div className={`
-        w-64 bg-gray-50 h-screen fixed left-0 top-0 border-r border-gray-200 overflow-y-auto z-50
+        w-64 bg-gray-50 h-screen h-[100dvh] fixed left-0 top-0 border-r border-gray-200 overflow-y-auto z-50
         transform transition-transform duration-300 ease-in-out
         lg:translate-x-0
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}
-      `}>
+        safe-area-left
+      `}
+      style={{ 
+        height: '100dvh', /* Dynamic viewport height for mobile */
+        paddingTop: 'env(safe-area-inset-top)',
+        paddingBottom: 'env(safe-area-inset-bottom)',
+        paddingLeft: 'env(safe-area-inset-left)'
+      }}>
         <div className="p-4 sm:p-6">
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-3">
