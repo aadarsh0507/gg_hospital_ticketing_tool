@@ -157,15 +157,20 @@ table {
 }
 
 /* Header safe area handling - Force padding on mobile */
-.mobile-header-padding {
-  padding-top: 60px !important;
+.mobile-header-padding,
+header.mobile-header-padding,
+#app-header {
+  padding-top: 70px !important;
 }
 
 @media (max-width: 767px) {
+  header,
   header.mobile-header-padding,
-  .mobile-header-padding {
+  .mobile-header-padding,
+  #app-header {
     position: relative !important;
-    padding-top: 60px !important; /* Force 60px padding on mobile */
+    padding-top: 70px !important; /* Force 70px padding on mobile - status bar + spacing */
+    min-height: calc(70px + 56px) !important; /* Padding + content height */
   }
   
   /* Ensure header content is not too close to top */
