@@ -23,29 +23,47 @@ export default function Header({ onMenuClick }: HeaderProps) {
       const platform = Capacitor.getPlatform();
       
       if (platform === 'android') {
-        // For Android: Use 70px to ensure content is well below status bar
-        // Status bar can be 24-48px, plus 15px spacing, plus extra buffer for safety
-        const padding = '70px';
+        // For Android: Use 80px to ensure content is well below status bar
+        // Status bar can be 24-48px, plus 15px spacing, plus extra buffer
+        const padding = '80px';
         setHeaderPadding(padding);
         
         // Force apply padding immediately with multiple methods
-        setTimeout(() => {
-          const headerElement = document.querySelector('header');
+        const applyPadding = () => {
+          const headerElement = document.querySelector('header') || document.querySelector('#app-header');
           if (headerElement) {
             const htmlElement = headerElement as HTMLElement;
             htmlElement.style.paddingTop = padding;
             htmlElement.style.setProperty('padding-top', padding, 'important');
             htmlElement.classList.add('mobile-header-padding');
+            // Also set as data attribute for CSS targeting
+            htmlElement.setAttribute('data-header-padding', padding);
           }
-        }, 0);
+        };
         
-        // Also apply after a short delay to ensure it sticks
+        // Apply immediately
+        applyPadding();
+        
+        // Apply after DOM is ready
+        setTimeout(applyPadding, 0);
+        setTimeout(applyPadding, 50);
+        setTimeout(applyPadding, 100);
+        setTimeout(applyPadding, 200);
+        
+        // Also listen for any style changes and reapply
+        const observer = new MutationObserver(() => {
+          applyPadding();
+        });
+        
         setTimeout(() => {
-          const headerElement = document.querySelector('header');
+          const headerElement = document.querySelector('header') || document.querySelector('#app-header');
           if (headerElement) {
-            (headerElement as HTMLElement).style.paddingTop = padding;
+            observer.observe(headerElement, {
+              attributes: true,
+              attributeFilter: ['style', 'class'],
+            });
           }
-        }, 100);
+        }, 300);
       } else if (platform === 'ios') {
         // For iOS: status bar (44px with notch, 20px without) + 15px spacing
         const hasNotch = window.screen.height >= 812;
@@ -86,11 +104,12 @@ export default function Header({ onMenuClick }: HeaderProps) {
     <header 
       id="app-header"
       className="bg-white border-b border-gray-200 sticky top-0 z-40 w-full max-w-full overflow-visible mobile-header-padding"
+      data-header-padding={headerPadding}
       style={{
         paddingTop: headerPadding,
         marginTop: '0',
         position: 'relative',
-        minHeight: Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'android' ? 'calc(70px + 56px)' : 'auto',
+        minHeight: Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'android' ? 'calc(80px + 56px)' : 'auto',
       }}
     >
       <div className="flex items-center justify-between px-2 sm:px-3 md:px-4 lg:px-6 py-2.5 sm:py-3 md:py-4 w-full max-w-full min-w-0">
