@@ -165,6 +165,7 @@ header[data-header-padding="80px"] {
   padding-top: 80px !important;
 }
 
+/* Apply 80px padding on all mobile viewports (including DevTools) */
 @media (max-width: 767px) {
   header,
   header.mobile-header-padding,
@@ -184,6 +185,13 @@ header[data-header-padding="80px"] {
   
   /* Override any other padding rules */
   header[style*="padding-top"] {
+    padding-top: 80px !important;
+  }
+}
+
+/* Also apply for mobile user agents in browser */
+@media (max-width: 915px) {
+  header {
     padding-top: 80px !important;
   }
 }

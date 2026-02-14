@@ -18,69 +18,74 @@ export default function Header({ onMenuClick }: HeaderProps) {
   const { user, logout } = useAuth();
 
   useEffect(() => {
-    // Calculate header padding for mobile devices
-    if (Capacitor.isNativePlatform()) {
-      const platform = Capacitor.getPlatform();
-      
-      if (platform === 'android') {
-        // For Android: Use 80px to ensure content is well below status bar
-        // Status bar can be 24-48px, plus 15px spacing, plus extra buffer
-        const padding = '80px';
-        setHeaderPadding(padding);
-        
-        // Force apply padding immediately with multiple methods
-        const applyPadding = () => {
-          const headerElement = document.querySelector('header') || document.querySelector('#app-header');
-          if (headerElement) {
-            const htmlElement = headerElement as HTMLElement;
-            htmlElement.style.paddingTop = padding;
-            htmlElement.style.setProperty('padding-top', padding, 'important');
-            htmlElement.classList.add('mobile-header-padding');
-            // Also set as data attribute for CSS targeting
-            htmlElement.setAttribute('data-header-padding', padding);
-          }
-        };
-        
-        // Apply immediately
-        applyPadding();
-        
-        // Apply after DOM is ready
-        setTimeout(applyPadding, 0);
-        setTimeout(applyPadding, 50);
-        setTimeout(applyPadding, 100);
-        setTimeout(applyPadding, 200);
-        
-        // Also listen for any style changes and reapply
-        const observer = new MutationObserver(() => {
-          applyPadding();
-        });
-        
-        setTimeout(() => {
-          const headerElement = document.querySelector('header') || document.querySelector('#app-header');
-          if (headerElement) {
-            observer.observe(headerElement, {
-              attributes: true,
-              attributeFilter: ['style', 'class'],
-            });
-          }
-        }, 300);
-      } else if (platform === 'ios') {
-        // For iOS: status bar (44px with notch, 20px without) + 15px spacing
-        const hasNotch = window.screen.height >= 812;
-        const padding = hasNotch ? '59px' : '35px';
-        setHeaderPadding(padding);
-        
-        const headerElement = document.querySelector('header');
-        if (headerElement) {
-          (headerElement as HTMLElement).style.paddingTop = padding;
-        }
-      } else {
-        setHeaderPadding('15px');
+    // Calculate header padding for mobile devices (both native and mobile browsers)
+    const isMobile = window.innerWidth <= 767 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const isNative = Capacitor.isNativePlatform();
+    const platform = isNative ? Capacitor.getPlatform() : null;
+    
+    const applyPadding = (padding: string) => {
+      const headerElement = document.querySelector('header') || document.querySelector('#app-header');
+      if (headerElement) {
+        const htmlElement = headerElement as HTMLElement;
+        htmlElement.style.paddingTop = padding;
+        htmlElement.style.setProperty('padding-top', padding, 'important');
+        htmlElement.classList.add('mobile-header-padding');
+        htmlElement.setAttribute('data-header-padding', padding);
       }
+    };
+    
+    if (isNative && platform === 'android') {
+      // For Android native: Use 80px to ensure content is well below status bar
+      const padding = '80px';
+      setHeaderPadding(padding);
+      
+      // Apply immediately and with delays
+      applyPadding(padding);
+      setTimeout(() => applyPadding(padding), 0);
+      setTimeout(() => applyPadding(padding), 50);
+      setTimeout(() => applyPadding(padding), 100);
+      setTimeout(() => applyPadding(padding), 200);
+      
+      // Watch for style changes
+      setTimeout(() => {
+        const headerElement = document.querySelector('header') || document.querySelector('#app-header');
+        if (headerElement) {
+          const observer = new MutationObserver(() => applyPadding(padding));
+          observer.observe(headerElement, {
+            attributes: true,
+            attributeFilter: ['style', 'class'],
+          });
+        }
+      }, 300);
+    } else if (isNative && platform === 'ios') {
+      // For iOS: status bar (44px with notch, 20px without) + 15px spacing
+      const hasNotch = window.screen.height >= 812;
+      const padding = hasNotch ? '59px' : '35px';
+      setHeaderPadding(padding);
+      applyPadding(padding);
+    } else if (isMobile) {
+      // For mobile browsers/devtools: Apply 80px padding for mobile viewports
+      const padding = '80px';
+      setHeaderPadding(padding);
+      applyPadding(padding);
+      setTimeout(() => applyPadding(padding), 0);
+      setTimeout(() => applyPadding(padding), 100);
     } else {
-      // Web browser - no extra padding needed
+      // Desktop browser - minimal padding
       setHeaderPadding('15px');
     }
+    
+    // Handle window resize
+    const handleResize = () => {
+      const isMobileNow = window.innerWidth <= 767;
+      if (isMobileNow && !isNative) {
+        applyPadding('80px');
+        setHeaderPadding('80px');
+      }
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   useEffect(() => {
