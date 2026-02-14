@@ -4,7 +4,8 @@ import { ArrowRight, Mail, Lock, AlertCircle, Moon, User } from 'lucide-react';
 import { ApiError } from '../services/api';
 // import GGHospitalLogo from '../components/GGHospitalLogo';
 // Uncomment and update the path when you have your logo image:
-import logoImage from '/assets/logo.png';
+// Use public asset path instead of importing
+const logoImage = '/assets/logo.png';
 
 export default function Login() {
   const [email, setEmail] = useState('');

@@ -12,7 +12,9 @@
     "prisma:studio": "prisma studio",
     "seed": "node src/prisma/seed.js",
     "sync:cloud": "node scripts/sync-to-cloud.js",
-    "setup:env": "node scripts/setup-env.js"
+    "setup:env": "node scripts/setup-env.js",
+    "ensure-tables": "node scripts/ensure-tables.js",
+    "add-scheduled-columns": "node scripts/add-scheduled-columns.js"
   },
   "keywords": [],
   "author": "",

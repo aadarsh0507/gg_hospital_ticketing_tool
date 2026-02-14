@@ -1,66 +1,79 @@
 import { db, queryRows, queryRow } from '../utils/db.js';
+import { getCache, setCache } from '../utils/cache.js';
 
 export const getDashboardStats = async (req, res, next) => {
   try {
+    // Check cache first (5 minute TTL for dashboard stats)
+    const cacheKey = 'dashboard_stats';
+    const cached = getCache(cacheKey);
+    if (cached) {
+      return res.json(cached);
+    }
+
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const todayISO = today.toISOString();
 
-    // Total requests today
-    const totalRequestsTodayResult = await queryRow(
-      'SELECT COUNT(*) as count FROM requests WHERE "createdAt" >= ?',
-      [todayISO]
-    );
+    // Optimize: Run all queries in parallel instead of sequentially
+    const [
+      totalRequestsTodayResult,
+      completedRequestsTodayResult,
+      activeStaffResult,
+      recentActivitiesRaw,
+      totalRequestsResult,
+      averageResponseTimeRaw
+    ] = await Promise.all([
+      // Total requests today
+      queryRow(
+        'SELECT COUNT(*) as count FROM requests WHERE "createdAt" >= ?',
+        [todayISO]
+      ),
+      // Completed requests today
+      queryRow(
+        'SELECT COUNT(*) as count FROM requests WHERE status = ? AND "completedAt" >= ?',
+        ['COMPLETED', todayISO]
+      ),
+      // Active staff members
+      queryRow(
+        'SELECT COUNT(*) as count FROM users WHERE role IN (?, ?) AND "isActive" = 1',
+        ['STAFF', 'ADMIN']
+      ),
+      // Recent activities (last 10) - optimized with index and reduced JOIN overhead
+      queryRows(`
+        SELECT 
+          ra.id,
+          ra.action,
+          ra.description,
+          ra."createdAt",
+          u."firstName" as "userFirstName",
+          u."lastName" as "userLastName",
+          r."requestId" as "requestRequestId",
+          r."serviceType"
+        FROM request_activities ra
+        LEFT JOIN users u ON ra."userId" = u.id
+        LEFT JOIN requests r ON ra."requestId" = r.id
+        ORDER BY ra."createdAt" DESC
+        LIMIT 10
+      `),
+      // Total completed requests
+      queryRow(
+        'SELECT COUNT(*) as count FROM requests WHERE status = ?',
+        ['COMPLETED']
+      ),
+      // Average response time - optimized: only fetch what we need, limit to 50
+      queryRows(
+        `SELECT "createdAt", "completedAt" FROM requests 
+         WHERE status = ? AND "completedAt" IS NOT NULL AND "createdAt" >= ?
+         ORDER BY "completedAt" DESC
+         LIMIT 50`,
+        ['COMPLETED', todayISO]
+      )
+    ]);
+
     const totalRequestsToday = Number(totalRequestsTodayResult?.count) || 0;
-
-    // Completed requests today
-    const completedRequestsTodayResult = await queryRow(
-      'SELECT COUNT(*) as count FROM requests WHERE status = ? AND "completedAt" >= ?',
-      ['COMPLETED', todayISO]
-    );
     const completedRequestsToday = Number(completedRequestsTodayResult?.count) || 0;
-
-    // Active staff members
-    const activeStaffResult = await queryRow(
-      'SELECT COUNT(*) as count FROM users WHERE role IN (?, ?) AND "isActive" = 1',
-      ['STAFF', 'ADMIN']
-    );
     const activeStaff = Number(activeStaffResult?.count) || 0;
-
-    // Recent activities (last 10) - join with users and requests
-    const recentActivitiesRaw = await queryRows(`
-      SELECT 
-        ra.id,
-        ra.action,
-        ra.description,
-        ra."createdAt",
-        u.id as "userId",
-        u."firstName" as "userFirstName",
-        u."lastName" as "userLastName",
-        r.id as "requestId",
-        r."requestId" as "requestRequestId",
-        r."serviceType",
-        r.title
-      FROM request_activities ra
-      LEFT JOIN users u ON ra."userId" = u.id
-      LEFT JOIN requests r ON ra."requestId" = r.id
-      ORDER BY ra."createdAt" DESC
-      LIMIT 10
-    `);
-
-    // Total completed requests
-    const totalRequestsResult = await queryRow(
-      'SELECT COUNT(*) as count FROM requests WHERE status = ?',
-      ['COMPLETED']
-    );
     const totalRequests = Number(totalRequestsResult?.count) || 0;
-
-    // Average response time - get completed requests from today
-    const averageResponseTimeRaw = await queryRows(
-      `SELECT "createdAt", "completedAt" FROM requests 
-       WHERE status = ? AND "completedAt" IS NOT NULL AND "createdAt" >= ?`,
-      ['COMPLETED', todayISO]
-    );
 
     // Calculate average response time in minutes
     let avgResponseTime = 0;
@@ -101,14 +114,19 @@ export const getDashboardStats = async (req, res, next) => {
       };
     });
 
-    res.json({
+    const response = {
       totalRequestsToday,
       completedRequestsToday,
       activeStaff,
       totalRequests,
       averageResponseTime: avgResponseTime || 0,
       recentActivities: formattedActivities
-    });
+    };
+
+    // Cache the response for 5 minutes
+    setCache(cacheKey, response, 300);
+
+    res.json(response);
   } catch (error) {
     next(error);
   }

@@ -8,8 +8,6 @@ import {
   Settings,
   MapPin,
   Building2,
-  AlertTriangle,
-  MessageSquareWarning,
   Tag,
   Monitor,
   Calendar,
@@ -36,7 +34,8 @@ export default function Sidebar({ activePage, onPageChange, isOpen = false, onCl
   // Base menu items available to all users
   const baseMenuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['REQUESTER', 'ADMIN', 'STAFF'] },
-    { id: 'my-requests', label: 'My Requests', icon: FileText, roles: ['REQUESTER', 'ADMIN', 'STAFF'] }
+    { id: 'my-requests', label: 'My Requests', icon: FileText, roles: ['REQUESTER', 'ADMIN', 'STAFF'] },
+    { id: 'schedule', label: 'Schedule Requests', icon: Calendar, roles: ['REQUESTER', 'ADMIN', 'STAFF', 'HOD'] }
   ];
 
   // Admin-only menu items
@@ -59,16 +58,13 @@ export default function Sidebar({ activePage, onPageChange, isOpen = false, onCl
       icon: Settings,
       roles: ['ADMIN', 'HOD'],
       submenu: [
-        { id: 'users', label: 'Users', icon: Users, roles: ['ADMIN', 'HOD'] },
+        { id: 'users', label: 'Users', icon: Users, roles: ['ADMIN', 'HOD', 'STAFF', 'REQUESTER'] },
         { id: 'service-creation', label: 'Service Creation', icon: Tag, roles: ['ADMIN', 'HOD'] },
         { id: 'locations', label: 'Locations', icon: MapPin, roles: ['ADMIN'] },
         { id: 'departments', label: 'Departments', icon: Building2, roles: ['ADMIN'] },
-        { id: 'escalations', label: 'Escalations', icon: AlertTriangle, roles: ['ADMIN'] },
-        { id: 'feedback', label: 'Feedback Escalation', icon: MessageSquareWarning, roles: ['ADMIN'] },
         { id: 'labels', label: 'Labels', icon: Tag, roles: ['ADMIN'] }
       ]
     },
-    { id: 'schedule', label: 'Schedule Requests', icon: Calendar, roles: ['ADMIN', 'HOD'] },
     { id: 'reports', label: 'Reports', icon: FileBarChart, roles: ['ADMIN', 'HOD'] },
     { id: 'metrics', label: 'Request Metrics', icon: BarChart3, roles: ['ADMIN'] },
     { id: 'leaderboard', label: 'Team Leaderboard', icon: Trophy, roles: ['ADMIN'] },

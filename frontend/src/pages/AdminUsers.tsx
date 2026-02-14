@@ -1,7 +1,50 @@
 import { useState, useEffect } from 'react';
-import { Plus, MoreVertical, Users, Search, Edit, Trash2, Mail, Phone, Shield, Building2 } from 'lucide-react';
-import { usersApi, ApiError } from '../services/api';
+import { Plus, MoreVertical, Users, Search, Edit, Trash2, Mail, Phone, Shield, Building2, MapPin } from 'lucide-react';
+import { usersApi, locationsApi, ApiError } from '../services/api';
 import CreateUserModal from '../components/CreateUserModal';
+import UserLocationModal from '../components/UserLocationModal';
+import { useAuth } from '../contexts/AuthContext';
+
+// Power Icon Component for User Status Toggle - Enhanced visibility
+const UserPowerIcon = ({ isActive, className = '' }: { isActive: boolean; className?: string }) => {
+  if (isActive) {
+    // Active state: Filled power icon
+    return (
+      <svg
+        className={className}
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        {/* Main filled circle */}
+        <circle cx="12" cy="12" r="9" fill="currentColor" />
+        {/* Power line on top - white for contrast */}
+        <line x1="12" y1="2" x2="12" y2="8" stroke="white" strokeWidth="3" strokeLinecap="round" />
+      </svg>
+    );
+  } else {
+    // Inactive state: Outlined power icon with slash
+    return (
+      <svg
+        className={className}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="3"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        {/* Outlined circle */}
+        <circle cx="12" cy="12" r="9" />
+        {/* Power line on top */}
+        <line x1="12" y1="2" x2="12" y2="8" />
+        {/* Slash through to indicate off */}
+        <line x1="5" y1="5" x2="19" y2="19" strokeWidth="3" />
+      </svg>
+    );
+  }
+};
 
 interface User {
   id: string;
@@ -11,6 +54,14 @@ interface User {
   role: string;
   phoneNumber?: string;
   department?: string | null;
+  locationId?: string | null;
+  location?: {
+    id: string;
+    name: string;
+    floor?: number;
+    areaType?: string;
+    blockName?: string;
+  } | null;
   isActive: boolean;
   createdAt: string;
 }
@@ -21,6 +72,7 @@ interface DepartmentGroup {
 }
 
 export default function AdminUsers() {
+  const { user: currentUser, refreshUser } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [usersByDepartment, setUsersByDepartment] = useState<DepartmentGroup[]>([]);
   const [allUsers, setAllUsers] = useState<User[]>([]);
@@ -28,17 +80,49 @@ export default function AdminUsers() {
   const [error, setError] = useState<string | null>(null);
   const [showUserModal, setShowUserModal] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [togglingUsers, setTogglingUsers] = useState<Set<string>>(new Set());
+  const [showLocationModal, setShowLocationModal] = useState(false);
+  const [selectedUserForLocation, setSelectedUserForLocation] = useState<User | null>(null);
+  const [blocks, setBlocks] = useState<any[]>([]);
+  const [loadingLocations, setLoadingLocations] = useState(false);
+
+  // All users can toggle their own status, ADMIN and HOD can toggle any user's status
+  const canToggleAnyUserStatus = currentUser?.role === 'ADMIN' || currentUser?.role === 'HOD';
+  const canToggleOwnStatus = (userId: string) => currentUser?.id === userId;
 
   useEffect(() => {
     fetchUsers();
-  }, []);
+    
+    // Poll for updates every 10 seconds to reflect status changes from other users
+    // Reduced frequency from 3s to 10s to improve performance
+    const interval = setInterval(() => {
+      fetchUsers(false); // Don't show loading spinner on polling updates
+    }, 10000);
+    
+    return () => clearInterval(interval);
+  }, [canToggleAnyUserStatus, currentUser?.id]);
 
-  const fetchUsers = async () => {
+  const fetchUsers = async (showLoading = true) => {
     try {
-      setLoading(true);
+      if (showLoading) {
+        setLoading(true);
+      }
       const response = await usersApi.getUsers({ search: searchQuery || undefined });
-      setUsersByDepartment(response.usersByDepartment || []);
-      setAllUsers(response.users || []);
+      
+      // If user is not admin/HOD, filter to show only their own user
+      if (!canToggleAnyUserStatus && currentUser?.id) {
+        const ownUser = response.users.find(u => u.id === currentUser.id);
+        if (ownUser) {
+          setUsersByDepartment([{ name: ownUser.department || null, users: [ownUser] }]);
+          setAllUsers([ownUser]);
+        } else {
+          setUsersByDepartment([]);
+          setAllUsers([]);
+        }
+      } else {
+        setUsersByDepartment(response.usersByDepartment || []);
+        setAllUsers(response.users || []);
+      }
       setError(null);
     } catch (err) {
       if (err instanceof ApiError) {
@@ -48,7 +132,9 @@ export default function AdminUsers() {
       }
       console.error('Error fetching users:', err);
     } finally {
-      setLoading(false);
+      if (showLoading) {
+        setLoading(false);
+      }
     }
   };
 
@@ -61,7 +147,7 @@ export default function AdminUsers() {
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [searchQuery]);
+  }, [searchQuery, canToggleAnyUserStatus, currentUser?.id]);
 
   const filteredUsersByDepartment = usersByDepartment.filter(dept => {
     if (!searchQuery) return true;
@@ -102,6 +188,76 @@ export default function AdminUsers() {
     } catch (err) {
       console.error('Error deleting user:', err);
       alert('Failed to delete user');
+    }
+  };
+
+  const handleToggleUserStatus = async (user: User) => {
+    // Check if user can toggle this status
+    const canToggle = canToggleAnyUserStatus || canToggleOwnStatus(user.id);
+    
+    if (!canToggle) {
+      alert('You can only change your own availability status');
+      return;
+    }
+
+    if (togglingUsers.has(user.id)) return;
+
+    const newStatus = !user.isActive;
+    console.log(`Toggling user ${user.id} status from ${user.isActive} to ${newStatus}`);
+    
+    // Optimistically update the UI immediately for better UX
+    const updateUserInState = (users: User[]) => 
+      users.map(u => u.id === user.id ? { ...u, isActive: newStatus } : u);
+    
+    setUsersByDepartment(prev => 
+      prev.map(dept => ({
+        ...dept,
+        users: updateUserInState(dept.users)
+      }))
+    );
+    setAllUsers(prev => updateUserInState(prev));
+
+    try {
+      setTogglingUsers(prev => new Set(prev).add(user.id));
+      const response = await usersApi.updateUser(user.id, { isActive: newStatus });
+      console.log('Status update response:', response);
+      
+      // If updating own status, refresh auth context to update header
+      if (user.id === currentUser?.id) {
+        await refreshUser();
+      }
+      
+      // Refresh the entire user list to ensure consistency and reflect changes to all users
+      // This ensures all users see the updated status in real-time
+      await fetchUsers(false);
+    } catch (err) {
+      console.error('Error toggling user status:', err);
+      
+      // Revert optimistic update on error
+      const revertUserInState = (users: User[]) => 
+        users.map(u => u.id === user.id ? { ...u, isActive: !newStatus } : u);
+      
+      setUsersByDepartment(prev => 
+        prev.map(dept => ({
+          ...dept,
+          users: revertUserInState(dept.users)
+        }))
+      );
+      setAllUsers(prev => revertUserInState(prev));
+      
+      if (err instanceof ApiError) {
+        alert(err.data?.message || 'Failed to update user status');
+      } else {
+        alert('Failed to update user status');
+      }
+      // Refresh on error to ensure consistency
+      fetchUsers(false);
+    } finally {
+      setTogglingUsers(prev => {
+        const next = new Set(prev);
+        next.delete(user.id);
+        return next;
+      });
     }
   };
 
@@ -166,43 +322,44 @@ export default function AdminUsers() {
                     </span>
                   </div>
                 </div>
-                <div className="overflow-x-auto">
-                  <table className="w-full">
+                <div className="overflow-x-auto -mx-4 sm:mx-0">
+                  <table className="w-full min-w-[640px]">
                     <thead>
                       <tr className="border-b border-gray-200 bg-white">
-                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">User</th>
-                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Role</th>
-                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Contact</th>
-                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Status</th>
-                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Actions</th>
+                        <th className="text-left py-3 px-2 sm:px-4 text-xs sm:text-sm font-semibold text-gray-700">User</th>
+                        <th className="text-left py-3 px-2 sm:px-4 text-xs sm:text-sm font-semibold text-gray-700">Role</th>
+                        <th className="text-left py-3 px-2 sm:px-4 text-xs sm:text-sm font-semibold text-gray-700 hidden sm:table-cell">Contact</th>
+                        <th className="text-left py-3 px-2 sm:px-4 text-xs sm:text-sm font-semibold text-gray-700">Location</th>
+                        <th className="text-left py-3 px-2 sm:px-4 text-xs sm:text-sm font-semibold text-gray-700">Status</th>
+                        <th className="text-left py-3 px-2 sm:px-4 text-xs sm:text-sm font-semibold text-gray-700">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
                       {department.users.map((user) => (
                         <tr key={user.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                          <td className="py-4 px-4">
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                                <span className="text-blue-600 font-semibold text-sm">
+                          <td className="py-3 sm:py-4 px-2 sm:px-4">
+                            <div className="flex items-center gap-2 sm:gap-3">
+                              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                <span className="text-blue-600 font-semibold text-xs sm:text-sm">
                                   {user.firstName[0]}{user.lastName[0]}
                                 </span>
                               </div>
-                              <div>
-                                <p className="font-medium text-gray-900">
+                              <div className="min-w-0">
+                                <p className="font-medium text-gray-900 text-sm sm:text-base truncate">
                                   {user.firstName} {user.lastName}
                                 </p>
-                                <p className="text-sm text-gray-500">{user.email}</p>
+                                <p className="text-xs sm:text-sm text-gray-500 truncate">{user.email}</p>
                               </div>
                             </div>
                           </td>
-                          <td className="py-4 px-4">
-                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                          <td className="py-3 sm:py-4 px-2 sm:px-4">
+                            <span className={`px-2 sm:px-3 py-1 rounded-full text-xs font-medium ${
                               roleColors[user.role as keyof typeof roleColors] || roleColors.REQUESTER
                             }`}>
                               {user.role}
                             </span>
                           </td>
-                          <td className="py-4 px-4">
+                          <td className="py-3 sm:py-4 px-2 sm:px-4 hidden sm:table-cell">
                             <div className="space-y-1">
                               {user.phoneNumber && (
                                 <div className="flex items-center gap-2 text-sm text-gray-600">
@@ -212,37 +369,91 @@ export default function AdminUsers() {
                               )}
                               <div className="flex items-center gap-2 text-sm text-gray-600">
                                 <Mail className="w-4 h-4" />
-                                <span>{user.email}</span>
+                                <span className="truncate max-w-[200px]">{user.email}</span>
                               </div>
                             </div>
                           </td>
-                          <td className="py-4 px-4">
-                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                          <td className="py-3 sm:py-4 px-2 sm:px-4">
+                            {user.location ? (
+                              <div className="flex items-center gap-2">
+                                <MapPin className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                                <div className="min-w-0">
+                                  <p className="text-sm font-medium text-gray-900 truncate">
+                                    {user.location.blockName ? `${user.location.blockName} - ` : ''}
+                                    {user.location.name}
+                                  </p>
+                                  {user.location.floor && (
+                                    <p className="text-xs text-gray-500">Floor {user.location.floor}</p>
+                                  )}
+                                </div>
+                              </div>
+                            ) : (
+                              <span className="text-sm text-gray-400 italic">No location</span>
+                            )}
+                          </td>
+                          <td className="py-3 sm:py-4 px-2 sm:px-4">
+                            <span className={`px-2 sm:px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1.5 w-fit ${
                               user.isActive 
-                                ? 'bg-green-100 text-green-700' 
-                                : 'bg-gray-100 text-gray-700'
+                                ? 'bg-green-100 text-green-700 border border-green-300' 
+                                : 'bg-gray-200 text-gray-700 border border-gray-400'
                             }`}>
-                              {user.isActive ? 'Active' : 'Inactive'}
+                              <span className={`w-1.5 h-1.5 rounded-full ${user.isActive ? 'bg-green-500' : 'bg-gray-500'}`} />
+                              {user.isActive ? 'Available' : 'Not Available'}
                             </span>
                           </td>
-                          <td className="py-4 px-4">
-                            <div className="flex items-center gap-2">
+                          <td className="py-4 px-2 sm:px-4">
+                            <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                              {/* Power button - always show for users who can toggle (own status or admin/HOD) */}
+                              {(canToggleAnyUserStatus || canToggleOwnStatus(user.id)) && (
+                                <button 
+                                  onClick={() => handleToggleUserStatus(user)}
+                                  disabled={togglingUsers.has(user.id)}
+                                  className={`
+                                    p-2 sm:p-2.5 rounded-lg transition-all duration-200 flex-shrink-0
+                                    ${user.isActive
+                                      ? 'bg-green-500 hover:bg-green-600 text-white border border-green-600'
+                                      : 'bg-gray-400 hover:bg-gray-500 text-white border border-gray-500'
+                                    }
+                                    ${togglingUsers.has(user.id) ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:scale-110 active:scale-95'}
+                                    shadow-md
+                                  `}
+                                  title={user.isActive ? 'User is actively working - Click to mark as not available' : 'User is not available - Click to mark as actively working'}
+                                  aria-label={user.isActive ? 'Mark user as not available' : 'Mark user as available'}
+                                >
+                                  {togglingUsers.has(user.id) ? (
+                                    <div className="w-5 h-5 sm:w-6 sm:h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                  ) : (
+                                    <UserPowerIcon isActive={user.isActive} className="w-5 h-5 sm:w-6 sm:h-6" />
+                                  )}
+                                </button>
+                              )}
+                              {/* Location button - show for all users */}
+                              <button 
+                                onClick={() => {
+                                  setSelectedUserForLocation(user);
+                                  setShowLocationModal(true);
+                                }}
+                                className="p-2 sm:p-2.5 hover:bg-blue-50 rounded-lg transition-colors flex-shrink-0"
+                                title={user.location ? `Location: ${user.location.blockName ? `${user.location.blockName} - ` : ''}${user.location.name}` : 'Set user location'}
+                              >
+                                <MapPin className={`w-5 h-5 sm:w-6 sm:h-6 ${user.location ? 'text-blue-600' : 'text-gray-400'}`} />
+                              </button>
                               <button 
                                 onClick={() => {
                                   setEditingUser(user);
                                   setShowUserModal(true);
                                 }}
-                                className="p-1.5 hover:bg-gray-100 rounded transition-colors"
+                                className="p-2 sm:p-2.5 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
                                 title="Edit user"
                               >
-                                <Edit className="w-4 h-4 text-gray-500" />
+                                <Edit className="w-5 h-5 sm:w-6 sm:h-6 text-gray-500" />
                               </button>
                               <button 
                                 onClick={() => handleDelete(user.id)}
-                                className="p-1.5 hover:bg-red-50 rounded transition-colors"
+                                className="p-2 sm:p-2.5 hover:bg-red-50 rounded-lg transition-colors flex-shrink-0"
                                 title="Delete user"
                               >
-                                <Trash2 className="w-4 h-4 text-red-500" />
+                                <Trash2 className="w-5 h-5 sm:w-6 sm:h-6 text-red-500" />
                               </button>
                             </div>
                           </td>
@@ -267,6 +478,18 @@ export default function AdminUsers() {
           fetchUsers();
         }}
         user={editingUser}
+      />
+
+      <UserLocationModal
+        isOpen={showLocationModal}
+        onClose={() => {
+          setShowLocationModal(false);
+          setSelectedUserForLocation(null);
+        }}
+        onSuccess={() => {
+          fetchUsers(false);
+        }}
+        user={selectedUserForLocation}
       />
     </div>
   );

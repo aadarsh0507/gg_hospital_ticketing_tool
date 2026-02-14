@@ -162,31 +162,101 @@ export const requestDB = {
     const id = uuidv4();
     const now = new Date().toISOString();   // ⭐ timestamp
 
-    const sql = `
-      INSERT INTO requests 
-      (id, "requestId", "serviceType", title, description, priority, status, 
-       "locationId", "departmentId", "createdById", "assignedToId", "requestedBy", 
-       "estimatedTime", "createdAt", "updatedAt")
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `;
+    // Simple approach: try to use scheduled columns, if error, try to add them
+    let hasScheduledColumns = false;
+    try {
+      // Try a simple query to see if column exists
+      await sqliteCloud.query('SELECT "scheduledDate" FROM requests LIMIT 1');
+      hasScheduledColumns = true;
+    } catch (err) {
+      // Column doesn't exist, try to add all scheduled columns
+      const errorMsg = err.message || err.toString() || '';
+      if (errorMsg.includes('no such column') || errorMsg.includes('has no column')) {
+        console.log('📝 Scheduled columns missing, attempting to add them...');
+        try {
+          await sqliteCloud.execute('ALTER TABLE requests ADD COLUMN "scheduledDate" DATETIME');
+          await sqliteCloud.execute('ALTER TABLE requests ADD COLUMN "scheduledTime" TEXT');
+          await sqliteCloud.execute('ALTER TABLE requests ADD COLUMN "recurring" INTEGER NOT NULL DEFAULT 0');
+          await sqliteCloud.execute('ALTER TABLE requests ADD COLUMN "recurringPattern" TEXT');
+          console.log('✅ Added scheduled columns to requests table');
+          hasScheduledColumns = true;
+        } catch (alterErr) {
+          const alterErrorMsg = alterErr.message || alterErr.toString() || '';
+          if (alterErrorMsg.includes('duplicate column') || alterErrorMsg.includes('already exists')) {
+            // Columns actually exist, use them
+            hasScheduledColumns = true;
+          } else {
+            // Can't add columns, use basic INSERT
+            console.warn('⚠️  Could not add scheduled columns, using basic INSERT:', alterErrorMsg);
+            hasScheduledColumns = false;
+          }
+        }
+      } else {
+        // Different error - assume columns don't exist
+        hasScheduledColumns = false;
+      }
+    }
 
-    await sqliteCloud.execute(sql, [
-      id,
-      data.requestId,
-      data.serviceType,
-      data.title,
-      data.description || null,
-      data.priority || 3,
-      data.status || 'NEW',
-      data.locationId || null,
-      data.departmentId || null,
-      data.createdById,
-      data.assignedToId || null,
-      data.requestedBy || null,
-      data.estimatedTime || null,
-      now,   // createdAt
-      now    // updatedAt
-    ]);
+    let sql, params;
+    if (hasScheduledColumns) {
+      sql = `
+        INSERT INTO requests 
+        (id, "requestId", "serviceType", title, description, priority, status, 
+         "locationId", "departmentId", "createdById", "assignedToId", "requestedBy", 
+         "estimatedTime", "scheduledDate", "scheduledTime", "recurring", "recurringPattern",
+         "createdAt", "updatedAt")
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `;
+      params = [
+        id,
+        data.requestId,
+        data.serviceType,
+        data.title,
+        data.description || null,
+        data.priority || 3,
+        data.status || 'NEW',
+        data.locationId || null,
+        data.departmentId || null,
+        data.createdById,
+        data.assignedToId || null,
+        data.requestedBy || null,
+        data.estimatedTime || null,
+        data.scheduledDate || null,
+        data.scheduledTime || null,
+        data.recurring ? 1 : 0,
+        data.recurringPattern || null,
+        now,   // createdAt
+        now    // updatedAt
+      ];
+    } else {
+      // Fallback: INSERT without scheduled columns
+      sql = `
+        INSERT INTO requests 
+        (id, "requestId", "serviceType", title, description, priority, status, 
+         "locationId", "departmentId", "createdById", "assignedToId", "requestedBy", 
+         "estimatedTime", "createdAt", "updatedAt")
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `;
+      params = [
+        id,
+        data.requestId,
+        data.serviceType,
+        data.title,
+        data.description || null,
+        data.priority || 3,
+        data.status || 'NEW',
+        data.locationId || null,
+        data.departmentId || null,
+        data.createdById,
+        data.assignedToId || null,
+        data.requestedBy || null,
+        data.estimatedTime || null,
+        now,   // createdAt
+        now    // updatedAt
+      ];
+    }
+
+    await sqliteCloud.execute(sql, params);
 
     return await this.findUnique({ id });
   },

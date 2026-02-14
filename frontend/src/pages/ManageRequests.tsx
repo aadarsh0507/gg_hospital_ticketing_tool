@@ -26,6 +26,11 @@ interface Request {
     firstName: string;
     lastName: string;
   };
+  assignedTo?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+  };
 }
 
 export default function ManageRequests() {
@@ -238,6 +243,9 @@ export default function ManageRequests() {
                   Requested By
                 </th>
                 <th className="px-3 sm:px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                  Assigned To
+                </th>
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
@@ -245,7 +253,7 @@ export default function ManageRequests() {
             <tbody className="divide-y divide-gray-200">
               {requests.length === 0 ? (
                 <tr>
-                  <td colSpan={10} className="px-6 py-8 text-center text-gray-500">
+                  <td colSpan={11} className="px-6 py-8 text-center text-gray-500">
                     No requests found
                   </td>
                 </tr>
@@ -286,11 +294,17 @@ export default function ManageRequests() {
                       <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {requestedBy}
                       </td>
+                      <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {request.assignedTo 
+                          ? `${request.assignedTo.firstName} ${request.assignedTo.lastName}`
+                          : <span className="text-gray-400 italic">Unassigned</span>
+                        }
+                      </td>
                       <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                         <button
                           onClick={() => handleStatusUpdate(request)}
                           className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
-                          title="Update Status"
+                          title="Update Status & Assignment"
                         >
                           <Edit className="w-4 h-4" />
                           <span className="hidden sm:inline">Update</span>
@@ -358,6 +372,7 @@ export default function ManageRequests() {
           }}
           requestId={selectedRequest.id}
           currentStatus={selectedRequest.status}
+          currentAssignedToId={selectedRequest.assignedTo?.id || null}
           onSuccess={handleStatusUpdateSuccess}
         />
       )}

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { TrendingUp, Clock, Users, CheckCircle, AlertCircle } from 'lucide-react';
+import { TrendingUp, Clock, Users, CheckCircle } from 'lucide-react';
 import { dashboardApi } from '../services/api';
 import { ApiError } from '../services/api';
 
@@ -23,6 +23,7 @@ export default function Dashboard() {
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
+        // Show skeleton/placeholder immediately while loading
         const data = await dashboardApi.getStats();
         
         // Calculate percentage change (mock for now, can be enhanced with historical data)
@@ -176,15 +177,6 @@ export default function Dashboard() {
               <div>
                 <p className="font-medium text-gray-900">Create Request</p>
                 <p className="text-xs text-gray-600">Send new request link</p>
-              </div>
-            </button>
-            <button className="w-full flex items-center gap-3 p-4 bg-yellow-50 hover:bg-yellow-100 rounded-lg transition-colors text-left">
-              <div className="w-10 h-10 bg-yellow-600 rounded-lg flex items-center justify-center">
-                <AlertCircle className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <p className="font-medium text-gray-900">View Escalations</p>
-                <p className="text-xs text-gray-600">Check urgent items</p>
               </div>
             </button>
           </div>

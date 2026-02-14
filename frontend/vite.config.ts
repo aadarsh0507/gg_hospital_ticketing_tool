@@ -1,9 +1,55 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import { VitePWA } from 'vite-plugin-pwa';
+import { viteStaticCopy } from 'vite-plugin-static-copy';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    // Ensure non-`public/` static assets still get shipped into `dist/`
+    viteStaticCopy({
+      targets: [
+        { src: 'icons/*', dest: 'icons' },
+        { src: 'assets/logo.png', dest: 'assets' },
+      ],
+    }),
+    VitePWA({
+      registerType: 'autoUpdate',
+      // Precache everything Vite emits (plus our copied static assets)
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest,json}'],
+      },
+      manifest: {
+        name: 'GG Hospital Ticketing Tool',
+        short_name: 'GG Ticketing',
+        description: 'Hospital ticketing and concierge dashboard',
+        start_url: '/',
+        scope: '/',
+        display: 'standalone',
+        theme_color: '#ffffff',
+        background_color: '#ffffff',
+        icons: [
+          {
+            src: '/icons/web-app-manifest-192x192.png',
+            sizes: '192x192',
+            type: 'image/png',
+            purpose: 'any maskable',
+          },
+          {
+            src: '/icons/web-app-manifest-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'any maskable',
+          },
+        ],
+      },
+      // Lets you test PWA behavior during `vite dev`
+      devOptions: {
+        enabled: true,
+      },
+    }),
+  ],
   optimizeDeps: {
     exclude: ['lucide-react'],
   },

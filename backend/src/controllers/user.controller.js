@@ -8,7 +8,7 @@ export const getUsers = async (req, res, next) => {
 
     let sql = `
       SELECT id, email, "firstName", "lastName", "phoneNumber", role, department, 
-             "isActive", "createdAt", "updatedAt"
+             "locationId", "isActive", "createdAt", "updatedAt"
       FROM users
       WHERE 1=1
     `;
@@ -30,22 +30,70 @@ export const getUsers = async (req, res, next) => {
       params.push(searchPattern, searchPattern, searchPattern);
     }
 
-    sql += ' ORDER BY CASE WHEN department IS NULL THEN 1 ELSE 0 END, department ASC, "firstName" ASC, "lastName" ASC';
+    // Optimized: Use JOIN instead of N+1 queries
+    let optimizedSql = `
+      SELECT 
+        u.id, u.email, u."firstName", u."lastName", u."phoneNumber", u.role, u.department,
+        u."locationId", u."isActive", u."createdAt", u."updatedAt",
+        l.id as "location_id", l.name as "location_name", l.floor as "location_floor",
+        l."areaType" as "location_areaType", b.name as "block_name"
+      FROM users u
+      LEFT JOIN locations l ON u."locationId" = l.id
+      LEFT JOIN blocks b ON l."blockId" = b.id
+      WHERE 1=1
+    `;
+    const optimizedParams = [];
 
-    const usersRaw = await queryRows(sql, params);
+    if (isActive !== undefined) {
+      optimizedSql += ' AND u."isActive" = ?';
+      optimizedParams.push(isActive === 'true' ? 1 : 0);
+    }
 
-    const users = usersRaw.map(user => ({
-      id: user.id,
-      email: user.email,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      phoneNumber: user.phoneNumber,
-      role: user.role,
-      department: user.department,
-      isActive: user.isActive === 1 || user.isActive === true || user.isActive === null,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt
-    }));
+    if (role) {
+      optimizedSql += ' AND u.role = ?';
+      optimizedParams.push(role);
+    }
+
+    if (search) {
+      optimizedSql += ' AND (u."firstName" LIKE ? OR u."lastName" LIKE ? OR u.email LIKE ?)';
+      const searchPattern = `%${search}%`;
+      optimizedParams.push(searchPattern, searchPattern, searchPattern);
+    }
+
+    optimizedSql += ' ORDER BY CASE WHEN u.department IS NULL THEN 1 ELSE 0 END, u.department ASC, u."firstName" ASC, u."lastName" ASC';
+
+    const usersRaw = await queryRows(optimizedSql, optimizedParams);
+
+    // Transform results
+    const usersWithLocations = usersRaw.map((user) => {
+      let location = null;
+      if (user.location_id) {
+        location = {
+          id: user.location_id,
+          name: user.location_name,
+          floor: user.location_floor,
+          areaType: user.location_areaType,
+          blockName: user.block_name
+        };
+      }
+      
+      return {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        phoneNumber: user.phoneNumber,
+        role: user.role,
+        department: user.department,
+        locationId: user.locationId,
+        location: location,
+        isActive: user.isActive === 1 || user.isActive === true || user.isActive === null,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt
+      };
+    });
+
+    const users = usersWithLocations;
 
     // Group users by department
     const usersByDepartment = {};
@@ -91,7 +139,7 @@ export const getUsers = async (req, res, next) => {
 
 export const createUser = async (req, res, next) => {
   try {
-    const { email, password, firstName, lastName, phoneNumber, role, department } = req.body;
+    const { email, password, firstName, lastName, phoneNumber, role, department, locationId } = req.body;
 
     // Validate required fields
     if (!email || !password || !firstName || !lastName) {
@@ -125,8 +173,8 @@ export const createUser = async (req, res, next) => {
 
     await execute(
       `INSERT INTO users (
-        id, email, password, "firstName", "lastName", "phoneNumber", role, department, "isActive", "createdAt", "updatedAt"
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        id, email, password, "firstName", "lastName", "phoneNumber", role, department, "locationId", "isActive", "createdAt", "updatedAt"
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         id,
         email.trim().toLowerCase(),
@@ -136,6 +184,7 @@ export const createUser = async (req, res, next) => {
         phoneNumber?.trim() || null,
         userRole,
         department?.trim() || null,
+        locationId || null,
         1, // isActive
         now,
         now
@@ -144,7 +193,7 @@ export const createUser = async (req, res, next) => {
 
     // Fetch created user
     const userRaw = await queryRow(
-      'SELECT id, email, "firstName", "lastName", "phoneNumber", role, department, "isActive", "createdAt", "updatedAt" FROM users WHERE id = ?',
+      'SELECT id, email, "firstName", "lastName", "phoneNumber", role, department, "locationId", "isActive", "createdAt", "updatedAt" FROM users WHERE id = ?',
       [id]
     );
 
@@ -175,7 +224,9 @@ export const createUser = async (req, res, next) => {
 export const updateUser = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { email, password, firstName, lastName, phoneNumber, role, department, isActive } = req.body;
+    const { email, password, firstName, lastName, phoneNumber, role, department, locationId, isActive } = req.body;
+    const currentUserId = req.user?.id;
+    const currentUserRole = req.user?.role;
 
     // Check if user exists
     const existingUser = await queryRow(
@@ -187,7 +238,31 @@ export const updateUser = async (req, res, next) => {
       throw new AppError('User not found', 404);
     }
 
-    // Validate role if provided
+    // Check permissions: Users can only update their own isActive status
+    // ADMIN and HOD can update any field for any user
+    const isUpdatingOwnAccount = currentUserId === id;
+    const isAdminOrHOD = currentUserRole === 'ADMIN' || currentUserRole === 'HOD';
+    
+    // If user is updating their own account and only changing isActive, allow it
+    if (isUpdatingOwnAccount && !isAdminOrHOD) {
+      // Check if only isActive is being updated
+      const hasOtherFields = email !== undefined || password !== undefined || 
+                            firstName !== undefined || lastName !== undefined || 
+                            phoneNumber !== undefined || role !== undefined || 
+                            department !== undefined;
+      
+      if (hasOtherFields) {
+        throw new AppError('You can only update your own availability status. Contact an administrator to change other details.', 403);
+      }
+    } else if (!isAdminOrHOD) {
+      throw new AppError('Only administrators and managers can update user details', 403);
+    }
+
+    // Validate role if provided (only ADMIN/HOD can change roles)
+    if (role && !isAdminOrHOD) {
+      throw new AppError('Only administrators can change user roles', 403);
+    }
+    
     if (role) {
       const validRoles = ['ADMIN', 'STAFF', 'HOD'];
       if (!validRoles.includes(role)) {
@@ -239,6 +314,10 @@ export const updateUser = async (req, res, next) => {
       updateFields.push('department = ?');
       params.push(department?.trim() || null);
     }
+    if (locationId !== undefined) {
+      updateFields.push('"locationId" = ?');
+      params.push(locationId || null);
+    }
     if (isActive !== undefined) {
       updateFields.push('"isActive" = ?');
       params.push(isActive ? 1 : 0);
@@ -259,9 +338,34 @@ export const updateUser = async (req, res, next) => {
 
     // Fetch updated user
     const userRaw = await queryRow(
-      'SELECT id, email, "firstName", "lastName", "phoneNumber", role, department, "isActive", "createdAt", "updatedAt" FROM users WHERE id = ?',
+      'SELECT id, email, "firstName", "lastName", "phoneNumber", role, department, "locationId", "isActive", "createdAt", "updatedAt" FROM users WHERE id = ?',
       [id]
     );
+
+    // Fetch location if exists
+    let location = null;
+    if (userRaw.locationId) {
+      try {
+        const locationRow = await queryRow(
+          `SELECT l.id, l.name, l.floor, l."areaType", b.name as "blockName"
+           FROM locations l
+           LEFT JOIN blocks b ON l."blockId" = b.id
+           WHERE l.id = ?`,
+          [userRaw.locationId]
+        );
+        if (locationRow) {
+          location = {
+            id: locationRow.id,
+            name: locationRow.name,
+            floor: locationRow.floor,
+            areaType: locationRow.areaType,
+            blockName: locationRow.blockName
+          };
+        }
+      } catch (err) {
+        console.error('Error fetching location:', err);
+      }
+    }
 
     const user = {
       id: userRaw.id,
@@ -271,6 +375,8 @@ export const updateUser = async (req, res, next) => {
       phoneNumber: userRaw.phoneNumber,
       role: userRaw.role,
       department: userRaw.department,
+      locationId: userRaw.locationId,
+      location: location,
       isActive: userRaw.isActive === 1 || userRaw.isActive === true,
       createdAt: userRaw.createdAt,
       updatedAt: userRaw.updatedAt
