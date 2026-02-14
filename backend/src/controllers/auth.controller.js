@@ -88,12 +88,9 @@ export const login = async (req, res, next) => {
       throw new AppError('Invalid credentials', 401);
     }
 
-    // Check if user is active
-    if (!user.isActive) {
-      throw new AppError('Account is deactivated', 403);
-    }
-
     // Verify password
+    // Note: isActive status only indicates availability for work, not account access
+    // Users can login regardless of isActive status and can change it themselves
     const isValidPassword = await bcrypt.compare(password, user.password);
 
     if (!isValidPassword) {

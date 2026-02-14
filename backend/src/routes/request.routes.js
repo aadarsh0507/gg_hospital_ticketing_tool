@@ -6,7 +6,8 @@ import {
   getRequestById,
   updateRequest,
   deleteRequest,
-  getMyRequests
+  getMyRequests,
+  getScheduledRequests
 } from '../controllers/request.controller.js';
 
 const router = express.Router();
@@ -16,6 +17,9 @@ router.use(authenticate);
 
 // My requests (for all authenticated users - requesters see their own, admins see their own too)
 router.get('/my-requests', getMyRequests);
+
+// Scheduled requests (REQUESTER sees their own, HOD and ADMIN see all)
+router.get('/scheduled', getScheduledRequests);
 
 // Create request (all authenticated users can create requests)
 router.post('/', createRequest);

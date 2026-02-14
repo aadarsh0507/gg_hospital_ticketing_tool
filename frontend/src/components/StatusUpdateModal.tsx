@@ -1,12 +1,14 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X, AlertCircle, CheckCircle, ChevronDown } from 'lucide-react';
-import { requestsApi, ApiError } from '../services/api';
+import { requestsApi, usersApi, ApiError } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 
 interface StatusUpdateModalProps {
   isOpen: boolean;
   onClose: () => void;
   requestId: string;
   currentStatus: string;
+  currentAssignedToId?: string | null;
   onSuccess?: () => void;
 }
 
@@ -26,12 +28,66 @@ export default function StatusUpdateModal({
   onClose,
   requestId,
   currentStatus,
+  currentAssignedToId,
   onSuccess
 }: StatusUpdateModalProps) {
+  const { user: currentUser } = useAuth();
   const [selectedStatus, setSelectedStatus] = useState(currentStatus);
+  const [selectedAssignedToId, setSelectedAssignedToId] = useState<string | null>(currentAssignedToId || null);
+  const [availableUsers, setAvailableUsers] = useState<Array<{ id: string; firstName: string; lastName: string; role: string }>>([]);
+  const [loadingUsers, setLoadingUsers] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+
+  // Reset form when modal opens/closes
+  useEffect(() => {
+    if (isOpen) {
+      setSelectedStatus(currentStatus);
+      setSelectedAssignedToId(currentAssignedToId || null);
+      fetchAvailableUsers();
+    }
+  }, [isOpen, currentStatus, currentAssignedToId, currentUser]);
+
+  const fetchAvailableUsers = async () => {
+    try {
+      setLoadingUsers(true);
+      const userRole = currentUser?.role?.toUpperCase();
+      const isAdminOrHOD = userRole === 'ADMIN' || userRole === 'HOD';
+      const isStaff = userRole === 'STAFF';
+
+      if (!isAdminOrHOD && !isStaff) {
+        // No permission to assign
+        setAvailableUsers([]);
+        return;
+      }
+
+      // Fetch users based on role
+      // HOD and Admin can see all active users, but we filter to only show Staff and HOD
+      // Staff can only see themselves and other staff
+      const params: { isActive?: boolean; role?: string } = { isActive: true };
+      
+      if (isStaff) {
+        // Staff can only assign to staff users
+        params.role = 'STAFF';
+      }
+
+      const response = await usersApi.getUsers(params);
+      
+      // Filter to only show Staff and HOD users (exclude Admin)
+      const filteredUsers = response.users.filter(user => {
+        const userRole = user.role?.toUpperCase();
+        return userRole === 'STAFF' || userRole === 'HOD';
+      });
+      
+      setAvailableUsers(filteredUsers);
+    } catch (err) {
+      console.error('Error fetching users:', err);
+      setAvailableUsers([]);
+    } finally {
+      setLoadingUsers(false);
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -40,15 +96,26 @@ export default function StatusUpdateModal({
     setError(null);
     setSuccess(false);
 
-    if (selectedStatus === currentStatus) {
-      setError('Please select a different status');
+    const statusChanged = selectedStatus !== currentStatus;
+    const assignmentChanged = selectedAssignedToId !== (currentAssignedToId || null);
+
+    if (!statusChanged && !assignmentChanged) {
+      setError('Please make a change to update');
       return;
     }
 
     setLoading(true);
 
     try {
-      await requestsApi.updateRequest(requestId, { status: selectedStatus });
+      const updateData: { status?: string; assignedToId?: string | null } = {};
+      if (statusChanged) {
+        updateData.status = selectedStatus;
+      }
+      if (assignmentChanged) {
+        updateData.assignedToId = selectedAssignedToId || null;
+      }
+
+      await requestsApi.updateRequest(requestId, updateData);
       setSuccess(true);
       setTimeout(() => {
         onSuccess?.();
@@ -57,7 +124,7 @@ export default function StatusUpdateModal({
       }, 1000);
     } catch (err) {
       if (err instanceof ApiError) {
-        setError(err.data?.error || err.data?.message || 'Failed to update status');
+        setError(err.data?.error || err.data?.message || 'Failed to update request');
       } else {
         setError('An unexpected error occurred');
       }
@@ -125,7 +192,6 @@ export default function StatusUpdateModal({
                   onChange={(e) => setSelectedStatus(e.target.value)}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none bg-white pr-10"
                   disabled={loading}
-                  required
                 >
                   {STATUS_OPTIONS.map((option) => (
                     <option key={option.value} value={option.value}>
@@ -142,6 +208,35 @@ export default function StatusUpdateModal({
               )}
             </div>
 
+            {/* Assignment Selection */}
+            {availableUsers.length > 0 && (
+              <div>
+                <label htmlFor="assignedTo" className="block text-sm font-medium text-gray-700 mb-2">
+                  Assign To
+                </label>
+                <div className="relative">
+                  <select
+                    id="assignedTo"
+                    value={selectedAssignedToId || ''}
+                    onChange={(e) => setSelectedAssignedToId(e.target.value || null)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none bg-white pr-10"
+                    disabled={loading || loadingUsers}
+                  >
+                    <option value="">Unassigned</option>
+                    {availableUsers.map((user) => (
+                      <option key={user.id} value={user.id}>
+                        {user.firstName} {user.lastName} {user.role === 'STAFF' ? '(Staff)' : user.role === 'HOD' ? '(HOD)' : user.role === 'ADMIN' ? '(Admin)' : ''}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                </div>
+                <p className="mt-2 text-xs text-gray-500">
+                  Select a user to assign this ticket to, or leave unassigned
+                </p>
+              </div>
+            )}
+
             {/* Buttons */}
             <div className="flex gap-3 pt-4">
               <button
@@ -154,7 +249,7 @@ export default function StatusUpdateModal({
               </button>
               <button
                 type="submit"
-                disabled={loading || selectedStatus === currentStatus}
+                disabled={loading || loadingUsers || (selectedStatus === currentStatus && selectedAssignedToId === (currentAssignedToId || null))}
                 className="flex-1 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {loading ? (

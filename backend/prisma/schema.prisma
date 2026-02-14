@@ -102,6 +102,10 @@ model Request {
   requestedBy   String?
   estimatedTime Int?          // in minutes
   completedAt   DateTime?
+  scheduledDate DateTime?     // Date when request should be executed
+  scheduledTime String?       // Time when request should be executed (HH:MM format)
+  recurring     Boolean       @default(false) // Whether this is a recurring request
+  recurringPattern String?    // Pattern for recurring: DAILY, WEEKLY, MONTHLY
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
 

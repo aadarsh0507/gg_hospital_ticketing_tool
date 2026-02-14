@@ -61,7 +61,6 @@ export default function CreateServiceModal({ isOpen, onClose, onSuccess, service
   const tabs = [
     { id: 'basic-details', label: 'Basic Details' },
     { id: 'checklist-config', label: 'Checklist Configuration' },
-    { id: 'escalation-config', label: 'Escalation Configuration' },
   ];
 
   useEffect(() => {
@@ -453,11 +452,6 @@ export default function CreateServiceModal({ isOpen, onClose, onSuccess, service
             </div>
           )}
 
-          {activeTab === 'escalation-config' && (
-            <div className="text-center py-12">
-              <p className="text-gray-600">Escalation Configuration content will be implemented here</p>
-            </div>
-          )}
 
           {/* Action Buttons */}
           <div className="flex items-center justify-end gap-3 pt-6 border-t border-gray-200 mt-6">

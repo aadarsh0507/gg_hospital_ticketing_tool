@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { FileText, Clock, AlertTriangle, Pause, Search, ChevronDown, Plus, Calendar, X } from 'lucide-react';
+import { FileText, Clock, Pause, Search, ChevronDown, Plus, Calendar, X } from 'lucide-react';
 import { requestsApi, locationsApi, ApiError } from '../services/api';
 import ServiceRequestModal from '../components/ServiceRequestModal';
 import StatusBadge from '../components/StatusBadge';
@@ -33,7 +33,6 @@ export default function MyRequests() {
   const [summaryCards, setSummaryCards] = useState([
     { label: 'New Requests', count: 0, icon: FileText, color: 'blue' },
     { label: 'Delayed Requests', count: 0, icon: Clock, color: 'yellow' },
-    { label: 'Escalated Requests', count: 0, icon: AlertTriangle, color: 'red' },
     { label: 'On-Hold Requests', count: 0, icon: Pause, color: 'gray' }
   ]);
   const [requests, setRequests] = useState<Request[]>([]);
@@ -84,7 +83,11 @@ export default function MyRequests() {
   const fetchMyRequests = async () => {
     try {
       setLoading(true);
-      const response = await requestsApi.getMyRequests({ limit: 100 });
+      // Optimize: Fetch with pagination instead of all at once
+      const response = await requestsApi.getMyRequests({ 
+        limit: 50,  // Reduced from 100
+        page: 1 
+      });
       
       // Store all requests
       const allReqs = response.requests || [];
@@ -96,13 +99,11 @@ export default function MyRequests() {
       // Count requests by status (from all requests, not filtered)
       const newCount = allReqs.filter(r => r.status === 'NEW' || r.status === 'ASSIGNED').length;
       const delayedCount = allReqs.filter(r => r.status === 'DELAYED').length;
-      const escalatedCount = allReqs.filter(r => r.status === 'ESCALATED').length;
       const onHoldCount = allReqs.filter(r => r.status === 'ON_HOLD').length;
 
       setSummaryCards([
         { label: 'New Requests', count: newCount, icon: FileText, color: 'blue' },
         { label: 'Delayed Requests', count: delayedCount, icon: Clock, color: 'yellow' },
-        { label: 'Escalated Requests', count: escalatedCount, icon: AlertTriangle, color: 'red' },
         { label: 'On-Hold Requests', count: onHoldCount, icon: Pause, color: 'gray' }
       ]);
       setError(null);
@@ -496,13 +497,11 @@ export default function MyRequests() {
               
               const newCount = response.requests.filter(r => r.status === 'NEW' || r.status === 'ASSIGNED').length;
               const delayedCount = response.requests.filter(r => r.status === 'DELAYED').length;
-              const escalatedCount = response.requests.filter(r => r.status === 'ESCALATED').length;
               const onHoldCount = response.requests.filter(r => r.status === 'ON_HOLD').length;
 
               setSummaryCards([
                 { label: 'New Requests', count: newCount, icon: FileText, color: 'blue' },
                 { label: 'Delayed Requests', count: delayedCount, icon: Clock, color: 'yellow' },
-                { label: 'Escalated Requests', count: escalatedCount, icon: AlertTriangle, color: 'red' },
                 { label: 'On-Hold Requests', count: onHoldCount, icon: Pause, color: 'gray' }
               ]);
               setError(null);

@@ -1,5 +1,6 @@
 // Use proxy in development, or full URL in production
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || (import.meta.env.DEV ? '/api' : 'https://gg-hospital-ticketing-tool.onrender.com/api');
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || (import.meta.env.DEV ? '/api' : 'http://192.168.137.204:3001/api');
   
   // 'http://localhost:3001/api');
   
@@ -187,6 +188,12 @@ export const requestsApi = {
     departmentId?: string;
     description?: string;
     estimatedTime?: number;
+    serviceType?: string;
+    title?: string;
+    scheduledDate?: string;
+    scheduledTime?: string;
+    recurring?: boolean;
+    recurringPattern?: string;
   }) =>
     request<{ message: string; request: any }>(`/requests/${id}`, {
       method: 'PUT',
@@ -203,6 +210,10 @@ export const requestsApi = {
     requestedBy?: string;
     assignedToId?: string;
     estimatedTime?: number;
+    scheduledDate?: string;
+    scheduledTime?: string;
+    recurring?: boolean;
+    recurringPattern?: string;
   }) =>
     request<{ message: string; request: any }>('/requests', {
       method: 'POST',
@@ -213,6 +224,31 @@ export const requestsApi = {
     request<{ message: string }>(`/requests/${id}`, {
       method: 'DELETE',
     }),
+
+  getScheduledRequests: (params?: {
+    page?: number;
+    limit?: number;
+    search?: string;
+  }) => {
+    const queryParams = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          queryParams.append(key, String(value));
+        }
+      });
+    }
+    const query = queryParams.toString();
+    return request<{
+      scheduledRequests: any[];
+      pagination: {
+        page: number;
+        limit: number;
+        total: number;
+        pages: number;
+      };
+    }>(`/requests/scheduled${query ? `?${query}` : ''}`);
+  },
 };
 
 // Metrics API
@@ -406,11 +442,33 @@ export const usersApi = {
     phoneNumber?: string;
     role?: string;
     department?: string;
+    locationId?: string;
     isActive?: boolean;
   }) =>
     request<{ message: string; user: any }>(`/users/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data),
+    }),
+};
+
+// System Settings API
+export const systemSettingsApi = {
+  getSystemStatus: () =>
+    request<{
+      isActive: boolean;
+      updatedAt: string;
+      updatedBy: string | null;
+    }>('/system-settings/status'),
+
+  updateSystemStatus: (isActive: boolean) =>
+    request<{
+      message: string;
+      isActive: boolean;
+      updatedAt: string;
+      updatedBy: string | null;
+    }>('/system-settings/status', {
+      method: 'PUT',
+      body: JSON.stringify({ isActive }),
     }),
 };
 

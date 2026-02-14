@@ -11,8 +11,6 @@ import ManageRequests from './pages/ManageRequests';
 import MyRequests from './pages/MyRequests';
 import AdminLocations from './pages/AdminLocations';
 import AdminDepartments from './pages/AdminDepartments';
-import AdminEscalations from './pages/AdminEscalations';
-import AdminFeedbackEscalation from './pages/AdminFeedbackEscalation';
 import AdminLabels from './pages/AdminLabels';
 import AppDisplay from './pages/AppDisplay';
 import ScheduleRequests from './pages/ScheduleRequests';
@@ -42,9 +40,9 @@ function AppContent() {
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
-  // Restrict STAFF users to only dashboard and my-requests
+  // Restrict STAFF users to only dashboard, my-requests, and schedule
   useEffect(() => {
-    if (user?.role === 'STAFF' && activePage !== 'dashboard' && activePage !== 'my-requests') {
+    if (user?.role === 'STAFF' && activePage !== 'dashboard' && activePage !== 'my-requests' && activePage !== 'schedule') {
       setActivePage('dashboard');
     }
   }, [user?.role, activePage]);
@@ -67,8 +65,8 @@ function AppContent() {
     const isHOD = user?.role === 'HOD';
     const isStaff = user?.role === 'STAFF';
 
-    // For STAFF users, only allow dashboard and my-requests
-    if (isStaff && activePage !== 'dashboard' && activePage !== 'my-requests') {
+    // For STAFF users, only allow dashboard, my-requests, and schedule
+    if (isStaff && activePage !== 'dashboard' && activePage !== 'my-requests' && activePage !== 'schedule') {
       return <div className="p-6 text-center text-red-600">Insufficient permissions. Redirecting...</div>;
     }
 
@@ -100,9 +98,7 @@ function AppContent() {
         }
         return <ManageRequests />;
       case 'users':
-        if (!isAdmin && !isHOD) {
-          return <div className="p-6 text-center text-red-600">Insufficient permissions</div>;
-        }
+        // All users can access to change their own status, but only see their own row if not admin/HOD
         return <AdminUsers />;
       case 'service-creation':
         if (!isAdmin && !isHOD) {
@@ -119,16 +115,6 @@ function AppContent() {
           return <div className="p-6 text-center text-red-600">Insufficient permissions</div>;
         }
         return <AdminDepartments />;
-      case 'escalations':
-        if (!isAdmin) {
-          return <div className="p-6 text-center text-red-600">Insufficient permissions</div>;
-        }
-        return <AdminEscalations />;
-      case 'feedback':
-        if (!isAdmin) {
-          return <div className="p-6 text-center text-red-600">Insufficient permissions</div>;
-        }
-        return <AdminFeedbackEscalation />;
       case 'labels':
         if (!isAdmin) {
           return <div className="p-6 text-center text-red-600">Insufficient permissions</div>;
@@ -140,9 +126,6 @@ function AppContent() {
         }
         return <AppDisplay />;
       case 'schedule':
-        if (!isAdmin && !isHOD) {
-          return <div className="p-6 text-center text-red-600">Insufficient permissions</div>;
-        }
         return <ScheduleRequests />;
       case 'reports':
         if (!isAdmin && !isHOD) {

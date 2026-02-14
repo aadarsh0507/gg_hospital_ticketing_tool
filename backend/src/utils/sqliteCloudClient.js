@@ -279,25 +279,174 @@ async function migrateSchema() {
           }
         }
       }
+
+      // Check and add scheduled columns
+      const scheduledColumns = [
+        { name: 'scheduledDate', type: 'DATETIME' },
+        { name: 'scheduledTime', type: 'TEXT' },
+        { name: 'recurring', type: 'INTEGER NOT NULL DEFAULT 0' },
+        { name: 'recurringPattern', type: 'TEXT' }
+      ];
+
+      // Check if each column exists before trying to add it
+      for (const col of scheduledColumns) {
+        let columnExists = false;
+        try {
+          await query(`SELECT "${col.name}" FROM requests LIMIT 1`);
+          columnExists = true;
+        } catch (err) {
+          const errorMsg = err.message || err.toString() || '';
+          if (errorMsg.includes('no such column') || errorMsg.includes('has no column') || errorMsg.includes(col.name)) {
+            columnExists = false;
+          } else {
+            // Some other error, assume column doesn't exist and try to add it
+            columnExists = false;
+          }
+        }
+        
+        // Add column if it doesn't exist
+        if (!columnExists) {
+          try {
+            await execute(`ALTER TABLE requests ADD COLUMN "${col.name}" ${col.type}`);
+            console.log(`✅ Added ${col.name} column to requests table`);
+          } catch (alterErr) {
+            const alterErrorMsg = alterErr.message || alterErr.toString() || '';
+            if (alterErrorMsg.includes('duplicate column') || 
+                alterErrorMsg.includes('already exists')) {
+              // Column already exists (race condition or just added), that's fine
+              // Silently ignore - no need to log
+            } else {
+              console.warn(`⚠️  Could not add ${col.name} column:`, alterErrorMsg);
+            }
+          }
+        }
+        // If column exists, skip silently (no log needed)
+      }
     } catch (tableErr) {
       // Table doesn't exist yet, will be created by schema initialization
       // Silently ignore
     }
 
-    // Drop and recreate services table if it exists (since user has no data)
+    // Check if services table exists and add missing columns if needed
     try {
       await query('SELECT * FROM services LIMIT 1');
-      // Table exists, drop it to recreate with correct schema
-      console.log('📝 Dropping existing services table to recreate with correct schema...');
-      try {
-        await execute('DROP TABLE services');
-        console.log('✅ Dropped services table');
-      } catch (dropErr) {
-        console.warn('⚠️  Could not drop services table:', dropErr.message);
+      // Table exists, check for missing columns and add them
+      // List of columns that should exist in services table
+      const servicesColumns = [
+        { name: 'isActive', type: 'INTEGER NOT NULL DEFAULT 1' }
+      ];
+
+      for (const col of servicesColumns) {
+        let columnExists = false;
+        try {
+          await query(`SELECT "${col.name}" FROM services LIMIT 1`);
+          columnExists = true;
+        } catch (err) {
+          const errorMsg = err.message || err.toString() || '';
+          if (errorMsg.includes('no such column') || errorMsg.includes('has no column') || errorMsg.includes(col.name)) {
+            columnExists = false;
+          } else {
+            columnExists = false;
+          }
+        }
+        
+        // Add column if it doesn't exist
+        if (!columnExists) {
+          try {
+            await execute(`ALTER TABLE services ADD COLUMN "${col.name}" ${col.type}`);
+            console.log(`✅ Added ${col.name} column to services table`);
+          } catch (alterErr) {
+            const alterErrorMsg = alterErr.message || alterErr.toString() || '';
+            if (alterErrorMsg.includes('duplicate column') || 
+                alterErrorMsg.includes('already exists')) {
+              // Column already exists, that's fine
+            } else {
+              console.warn(`⚠️  Could not add ${col.name} column to services:`, alterErrorMsg);
+            }
+          }
+        }
       }
     } catch (tableErr) {
       // Table doesn't exist yet, will be created by schema initialization
       // Silently ignore
+    }
+
+    // Check if system_settings table exists, create if it doesn't
+    try {
+      await query('SELECT * FROM system_settings LIMIT 1');
+      // Table exists, that's fine
+    } catch (tableErr) {
+      // Table doesn't exist, create it
+      console.log('📝 Creating system_settings table...');
+      try {
+        await execute(`
+          CREATE TABLE IF NOT EXISTS system_settings (
+            id TEXT PRIMARY KEY,
+            key TEXT UNIQUE NOT NULL,
+            value TEXT NOT NULL,
+            "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            "updatedBy" TEXT,
+            FOREIGN KEY ("updatedBy") REFERENCES users(id) ON DELETE SET NULL
+          )
+        `);
+        console.log('✅ Created system_settings table');
+      } catch (createErr) {
+        console.warn('⚠️  Could not create system_settings table:', createErr.message);
+      }
+    }
+
+    // Check if users table exists and add locationId column if needed
+    try {
+      await query('SELECT * FROM users LIMIT 1');
+      // Table exists, check if locationId column exists
+      let locationIdExists = false;
+      try {
+        await query('SELECT "locationId" FROM users LIMIT 1');
+        locationIdExists = true;
+      } catch (err) {
+        if (err.message && (err.message.includes('no such column') || err.message.includes('locationId'))) {
+          locationIdExists = false;
+        } else {
+          throw err;
+        }
+      }
+      
+      // Add column if it doesn't exist
+      if (!locationIdExists) {
+        console.log('📝 Adding locationId column to users table...');
+        try {
+          await execute('ALTER TABLE users ADD COLUMN "locationId" TEXT');
+          console.log('✅ Added locationId column to users table');
+        } catch (alterErr) {
+          // Silently ignore duplicate column errors - column already exists
+          if (alterErr.message && (
+            alterErr.message.includes('duplicate column') || 
+            alterErr.message.includes('already exists') ||
+            alterErr.message.includes('UNIQUE constraint')
+          )) {
+            // Column already exists, that's fine
+            console.log('ℹ️  locationId column already exists in users table');
+          } else {
+            // Some other error, log it but don't fail
+            console.warn('⚠️  Could not add locationId column:', alterErr.message);
+          }
+        }
+      } else {
+        console.log('ℹ️  locationId column already exists in users table');
+      }
+      
+      // Create index for better query performance (always try, IF NOT EXISTS handles duplicates)
+      try {
+        await execute('CREATE INDEX IF NOT EXISTS idx_users_locationId ON users("locationId")');
+        console.log('✅ Created/verified index on locationId column');
+      } catch (idxErr) {
+        // Index might already exist, that's fine
+        console.log('ℹ️  Index may already exist');
+      }
+    } catch (tableErr) {
+      // Table doesn't exist yet, will be created by schema initialization with locationId column
+      // Silently ignore - table will be created by schema init
+      console.log('ℹ️  users table does not exist yet, will be created with locationId column');
     }
 
   } catch (error) {
@@ -321,9 +470,11 @@ export async function initializeSchema() {
       "phoneNumber" TEXT,
       role TEXT NOT NULL DEFAULT 'REQUESTER',
       department TEXT,
+      "locationId" TEXT,
       "isActive" INTEGER NOT NULL DEFAULT 1,
       "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+      "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY ("locationId") REFERENCES locations(id) ON DELETE SET NULL
     )`,
     `CREATE TABLE IF NOT EXISTS departments (
       id TEXT PRIMARY KEY,
@@ -369,6 +520,10 @@ export async function initializeSchema() {
       "requestedBy" TEXT,
       "estimatedTime" INTEGER,
       "completedAt" DATETIME,
+      "scheduledDate" DATETIME,
+      "scheduledTime" TEXT,
+      "recurring" INTEGER NOT NULL DEFAULT 0,
+      "recurringPattern" TEXT,
       "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
       "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY ("locationId") REFERENCES locations(id) ON DELETE SET NULL,
@@ -419,6 +574,14 @@ export async function initializeSchema() {
       FOREIGN KEY ("departmentId") REFERENCES departments(id) ON DELETE SET NULL,
       FOREIGN KEY ("locationId") REFERENCES locations(id) ON DELETE SET NULL
     )`,
+    `CREATE TABLE IF NOT EXISTS system_settings (
+      id TEXT PRIMARY KEY,
+      key TEXT UNIQUE NOT NULL,
+      value TEXT NOT NULL,
+      "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      "updatedBy" TEXT,
+      FOREIGN KEY ("updatedBy") REFERENCES users(id) ON DELETE SET NULL
+    )`,
   ];
 
   try {
@@ -429,6 +592,53 @@ export async function initializeSchema() {
     for (const statement of createTablesSQL) {
       await execute(statement);
     }
+    
+    // Create performance indexes for frequently queried columns
+    const createIndexesSQL = [
+      // Requests table indexes
+      'CREATE INDEX IF NOT EXISTS idx_requests_createdById ON requests("createdById")',
+      'CREATE INDEX IF NOT EXISTS idx_requests_assignedToId ON requests("assignedToId")',
+      'CREATE INDEX IF NOT EXISTS idx_requests_status ON requests(status)',
+      'CREATE INDEX IF NOT EXISTS idx_requests_createdAt ON requests("createdAt")',
+      'CREATE INDEX IF NOT EXISTS idx_requests_scheduledDate ON requests("scheduledDate")',
+      'CREATE INDEX IF NOT EXISTS idx_requests_locationId ON requests("locationId")',
+      'CREATE INDEX IF NOT EXISTS idx_requests_departmentId ON requests("departmentId")',
+      'CREATE INDEX IF NOT EXISTS idx_requests_serviceType ON requests("serviceType")',
+      'CREATE INDEX IF NOT EXISTS idx_requests_completedAt ON requests("completedAt")',
+      // Composite indexes for common query patterns
+      'CREATE INDEX IF NOT EXISTS idx_requests_status_createdAt ON requests(status, "createdAt" DESC)',
+      'CREATE INDEX IF NOT EXISTS idx_requests_createdById_status ON requests("createdById", status)',
+      'CREATE INDEX IF NOT EXISTS idx_requests_assignedToId_status ON requests("assignedToId", status)',
+      'CREATE INDEX IF NOT EXISTS idx_requests_scheduledDate_createdById ON requests("scheduledDate", "createdById")',
+      
+      // Users table indexes
+      'CREATE INDEX IF NOT EXISTS idx_users_role ON users(role)',
+      'CREATE INDEX IF NOT EXISTS idx_users_isActive ON users("isActive")',
+      'CREATE INDEX IF NOT EXISTS idx_users_department ON users(department)',
+      'CREATE INDEX IF NOT EXISTS idx_users_locationId ON users("locationId")',
+      
+      // Request activities indexes
+      'CREATE INDEX IF NOT EXISTS idx_request_activities_requestId ON request_activities("requestId")',
+      'CREATE INDEX IF NOT EXISTS idx_request_activities_userId ON request_activities("userId")',
+      'CREATE INDEX IF NOT EXISTS idx_request_activities_createdAt ON request_activities("createdAt" DESC)',
+      
+      // Locations indexes
+      'CREATE INDEX IF NOT EXISTS idx_locations_blockId ON locations("blockId")',
+      'CREATE INDEX IF NOT EXISTS idx_locations_departmentId ON locations("departmentId")',
+    ];
+    
+    console.log('📊 Creating performance indexes...');
+    for (const indexSQL of createIndexesSQL) {
+      try {
+        await execute(indexSQL);
+      } catch (idxError) {
+        // Index might already exist, that's fine
+        if (!idxError.message || !idxError.message.includes('already exists')) {
+          console.warn(`⚠️  Could not create index: ${indexSQL}`, idxError.message);
+        }
+      }
+    }
+    console.log('✅ Performance indexes created');
     console.log('✅ Database schema initialized in SQLite Cloud');
     
     return true;
