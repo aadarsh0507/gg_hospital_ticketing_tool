@@ -23,15 +23,29 @@ export default function Header({ onMenuClick }: HeaderProps) {
       const platform = Capacitor.getPlatform();
       
       if (platform === 'android') {
-        // For Android: Use 60px to ensure content is well below status bar
-        // This accounts for status bar (24-48px) + 15px spacing + buffer
-        setHeaderPadding('60px');
+        // For Android: Use 70px to ensure content is well below status bar
+        // Status bar can be 24-48px, plus 15px spacing, plus extra buffer for safety
+        const padding = '70px';
+        setHeaderPadding(padding);
         
-        // Force apply padding immediately
-        const headerElement = document.querySelector('header');
-        if (headerElement) {
-          (headerElement as HTMLElement).style.paddingTop = '60px';
-        }
+        // Force apply padding immediately with multiple methods
+        setTimeout(() => {
+          const headerElement = document.querySelector('header');
+          if (headerElement) {
+            const htmlElement = headerElement as HTMLElement;
+            htmlElement.style.paddingTop = padding;
+            htmlElement.style.setProperty('padding-top', padding, 'important');
+            htmlElement.classList.add('mobile-header-padding');
+          }
+        }, 0);
+        
+        // Also apply after a short delay to ensure it sticks
+        setTimeout(() => {
+          const headerElement = document.querySelector('header');
+          if (headerElement) {
+            (headerElement as HTMLElement).style.paddingTop = padding;
+          }
+        }, 100);
       } else if (platform === 'ios') {
         // For iOS: status bar (44px with notch, 20px without) + 15px spacing
         const hasNotch = window.screen.height >= 812;
@@ -70,11 +84,13 @@ export default function Header({ onMenuClick }: HeaderProps) {
 
   return (
     <header 
+      id="app-header"
       className="bg-white border-b border-gray-200 sticky top-0 z-40 w-full max-w-full overflow-visible mobile-header-padding"
       style={{
         paddingTop: headerPadding,
         marginTop: '0',
         position: 'relative',
+        minHeight: Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'android' ? 'calc(70px + 56px)' : 'auto',
       }}
     >
       <div className="flex items-center justify-between px-2 sm:px-3 md:px-4 lg:px-6 py-2.5 sm:py-3 md:py-4 w-full max-w-full min-w-0">
