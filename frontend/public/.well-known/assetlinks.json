@@ -3,6 +3,6 @@
   "target": {
     "namespace": "android_app",
     "package_name": "app.netlify.gghospitalsticketingtool.twa",
-    "sha256_cert_fingerprints": ["YOUR_ACTUAL_SHA256_FINGERPRINT"]
+    "sha256_cert_fingerprints": ["04:B5:35:74:08:53:AE:00:96:2F:00:A5:46:8A:50:25:0D:D2:19:A4:9B:2A:CF:32:36:80:8A:2B:5A:3E:16:A6"]
   }
 }]
