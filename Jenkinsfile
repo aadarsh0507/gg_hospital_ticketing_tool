@@ -36,7 +36,14 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                checkout scm
+                script {
+                    // Configure Git proxy if needed (uncomment and adjust if proxy requires authentication)
+                    // sh '''
+                    //     git config --global http.proxy http://172.16.6.186:8080
+                    //     git config --global https.proxy http://172.16.6.186:8080
+                    // '''
+                    checkout scm
+                }
             }
         }
         
