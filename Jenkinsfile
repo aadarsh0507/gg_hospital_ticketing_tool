@@ -27,6 +27,10 @@ pipeline {
         // Android Configuration
         ANDROID_HOME = '/opt/android-sdk'
         JAVA_HOME = '/usr/lib/jvm/java-17-openjdk-amd64'
+        
+        // Git proxy bypass for GitHub
+        NO_PROXY = 'github.com,*.github.com,api.github.com,uploads.github.com'
+        no_proxy = 'github.com,*.github.com,api.github.com,uploads.github.com'
     }
     
     tools {
@@ -37,11 +41,13 @@ pipeline {
         stage('Checkout') {
             steps {
                 script {
-                    // Configure Git proxy if needed (uncomment and adjust if proxy requires authentication)
-                    // sh '''
-                    //     git config --global http.proxy http://172.16.6.186:8080
-                    //     git config --global https.proxy http://172.16.6.186:8080
-                    // '''
+                    // Configure Git to bypass proxy for GitHub
+                    sh '''
+                        git config --global http.https://github.com.proxy ""
+                        git config --global https.https://github.com.proxy ""
+                        git config --global http.https://*.github.com.proxy ""
+                        git config --global https.https://*.github.com.proxy ""
+                    '''
                     checkout scm
                 }
             }
