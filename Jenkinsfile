@@ -41,12 +41,16 @@ pipeline {
         stage('Checkout') {
             steps {
                 script {
-                    // Configure Git to bypass proxy for GitHub
+                    // Configure SSH to use HTTPS port (443) for GitHub (bypasses port 22 firewall)
                     sh '''
-                        git config --global http.https://github.com.proxy ""
-                        git config --global https.https://github.com.proxy ""
-                        git config --global http.https://*.github.com.proxy ""
-                        git config --global https.https://*.github.com.proxy ""
+                        mkdir -p ~/.ssh
+                        cat >> ~/.ssh/config << 'EOF'
+Host github.com
+    Hostname ssh.github.com
+    Port 443
+    User git
+EOF
+                        chmod 600 ~/.ssh/config
                     '''
                     checkout scm
                 }
