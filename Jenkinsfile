@@ -1,6 +1,14 @@
 pipeline {
     agent any
     
+    triggers {
+        // Poll SCM every 5 minutes to check for changes
+        pollSCM('H/5 * * * *')
+        
+        // Alternative: Uncomment below for GitHub webhook support (requires webhook configuration)
+        // githubPush()
+    }
+    
     environment {
         // GitHub Packages Configuration
         GITHUB_OWNER = credentials('github-owner') // Your GitHub username/org
