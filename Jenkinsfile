@@ -11,8 +11,8 @@ pipeline {
     
     environment {
         // GitHub Packages Configuration
-        GITHUB_OWNER = credentials('github-owner') // Your GitHub username/org
-        GITHUB_TOKEN = credentials('github-token') // GitHub Personal Access Token with packages:write permission
+        GITHUB_OWNER = 'aadarsh0507'
+        GITHUB_TOKEN = credentials('github-creds') // GitHub Personal Access Token with packages:write permission
         GITHUB_REPO = 'gg_hospital_ticketing_tool' // Your repository name
         
         // App Configuration
