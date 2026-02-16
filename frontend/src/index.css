@@ -156,22 +156,24 @@ table {
   border-collapse: collapse;
 }
 
-/* Header safe area handling - Force padding on mobile */
-.mobile-header-padding,
-header.mobile-header-padding,
-#app-header,
-header[data-header-padding],
-header[data-header-padding="80px"] {
-  padding-top: 80px !important;
-}
-
-/* Apply 80px padding on all mobile viewports (including DevTools) */
-@media (max-width: 767px) {
+/* Header safe area handling - Desktop: NO extra padding */
+@media (min-width: 768px) {
   header,
   header.mobile-header-padding,
   .mobile-header-padding,
   #app-header,
   header[data-header-padding],
+  header[data-header-padding="80px"] {
+    padding-top: 0 !important; /* No padding on desktop */
+    min-height: auto !important;
+  }
+}
+
+/* Mobile: Apply 80px padding ONLY on mobile viewports */
+@media (max-width: 767px) {
+  header.mobile-header-padding,
+  .mobile-header-padding,
+  #app-header[data-header-padding="80px"],
   header[data-header-padding="80px"] {
     position: relative !important;
     padding-top: 80px !important; /* Force 80px padding on mobile - status bar + spacing */
@@ -180,25 +182,6 @@ header[data-header-padding="80px"] {
   
   /* Ensure header content is not too close to top */
   header > div {
-    padding-top: 0 !important;
-  }
-  
-  /* Override any other padding rules */
-  header[style*="padding-top"] {
-    padding-top: 80px !important;
-  }
-}
-
-/* Also apply for mobile user agents in browser */
-@media (max-width: 915px) {
-  header {
-    padding-top: 80px !important;
-  }
-}
-
-@media (min-width: 768px) {
-  header.mobile-header-padding,
-  .mobile-header-padding {
     padding-top: 0 !important;
   }
 }

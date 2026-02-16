@@ -71,8 +71,15 @@ export default function Header({ onMenuClick }: HeaderProps) {
       setTimeout(() => applyPadding(padding), 0);
       setTimeout(() => applyPadding(padding), 100);
     } else {
-      // Desktop browser - minimal padding
-      setHeaderPadding('15px');
+      // Desktop browser - no extra padding, remove mobile classes
+      setHeaderPadding('0px');
+      const headerElement = document.querySelector('header') || document.querySelector('#app-header');
+      if (headerElement) {
+        const htmlElement = headerElement as HTMLElement;
+        htmlElement.style.paddingTop = '0px';
+        htmlElement.classList.remove('mobile-header-padding');
+        htmlElement.removeAttribute('data-header-padding');
+      }
     }
     
     // Handle window resize
