@@ -11,8 +11,8 @@ pipeline {
     
     environment {
         // GitHub Packages Configuration
-        GITHUB_OWNER = credentials('github-owner') // Your GitHub username/org
-        GITHUB_TOKEN = credentials('github-token') // GitHub Personal Access Token with packages:write permission
+        GITHUB_OWNER = 'aadarsh0507'
+        GITHUB_TOKEN = credentials('github-creds') // GitHub Personal Access Token with packages:write permission
         GITHUB_REPO = 'gg_hospital_ticketing_tool' // Your repository name
         
         // App Configuration
@@ -27,6 +27,10 @@ pipeline {
         // Android Configuration
         ANDROID_HOME = '/opt/android-sdk'
         JAVA_HOME = '/usr/lib/jvm/java-17-openjdk-amd64'
+        
+        // Git proxy bypass for GitHub
+        NO_PROXY = 'github.com,*.github.com,api.github.com,uploads.github.com'
+        no_proxy = 'github.com,*.github.com,api.github.com,uploads.github.com'
     }
     
     tools {
@@ -36,7 +40,16 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                checkout scm
+                script {
+                    // Configure Git to bypass proxy for GitHub
+                    sh '''
+                        git config --global http.https://github.com.proxy ""
+                        git config --global https.https://github.com.proxy ""
+                        git config --global http.https://*.github.com.proxy ""
+                        git config --global https.https://*.github.com.proxy ""
+                    '''
+                    checkout scm
+                }
             }
         }
         
